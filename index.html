@@ -1,50 +1,102 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>feed</title>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0a0a0a"><title>feed</title>
 <style>
-*{box-sizing:border-box;margin:0}
-body{background:#000;color:#fff;font:14px/1.4 monospace}
-header{position:sticky;top:0;background:#000;border-bottom:1px solid #fff;padding:8px;z-index:5;display:flex;gap:6px;flex-wrap:wrap}
-input,select,textarea,button{background:#000;color:#fff;border:1px solid #fff;padding:7px 10px;font:inherit;border-radius:0}
-input{flex:1;min-width:140px}
-button{cursor:pointer}
-button.on{background:#fff;color:#000}
-#g{columns:2;gap:4px;padding:4px}
+:root{--bg:#0a0a0a;--s1:#141414;--s2:#1c1c1c;--ln:rgba(255,255,255,.09);--tx:#f5f5f5;--mu:#8a8a8a}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 Inter,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:96px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+header{position:sticky;top:0;z-index:5;padding:12px 12px 8px;background:rgba(10,10,10,.75);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.sb{display:flex;align-items:center;gap:10px;background:var(--s2);border-radius:16px;padding:0 14px;height:48px;border:1px solid var(--ln);transition:.2s}
+.sb:focus-within{border-color:rgba(255,255,255,.35)}
+.sb input{flex:1;background:none;border:0;outline:0;color:var(--tx);font:inherit;min-width:0}
+.sb svg{color:var(--mu);width:20px;height:20px;display:block}
+.seg{display:flex;gap:6px;margin-top:10px}
+.seg button{padding:6px 14px;border-radius:99px;background:var(--s1);border:1px solid var(--ln);color:var(--mu);font-size:13px;transition:.2s}
+.seg button.on{background:var(--tx);color:#000;border-color:var(--tx)}
+#g{columns:2;column-gap:8px;padding:8px 12px}
 @media(min-width:700px){#g{columns:4}}
 @media(min-width:1100px){#g{columns:6}}
-.c{position:relative;break-inside:avoid;margin-bottom:4px;cursor:pointer}
-.c img{width:100%;display:block;background:#111;min-height:80px}
-.b{position:absolute;top:4px;left:4px;background:#fff;color:#000;padding:0 4px;font-size:11px}
-#s{text-align:center;color:#888;padding:24px}
-#v{position:fixed;inset:0;background:#000;z-index:10;display:none;flex-direction:column}
-#v.o{display:flex}
-#m{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-#m img,#m video{max-width:100%;max-height:100%}
-#tg{max-height:72px;overflow:auto;padding:6px 8px;display:flex;gap:4px;flex-wrap:wrap;border-top:1px solid #333}
-.t{border:1px solid #555;padding:1px 6px;cursor:pointer;font-size:12px}
-#bar{border-top:1px solid #fff;padding:8px;display:flex;gap:6px;justify-content:space-between}
-#p{position:fixed;inset:0;background:#000;z-index:11;display:none;padding:12px;overflow:auto}
-#p.o{display:block}
-#p p{margin:12px 0 6px;color:#888}
-#iw{display:flex;gap:4px;flex-wrap:wrap}
+.c{position:relative;break-inside:avoid;margin-bottom:8px;border-radius:14px;overflow:hidden;background:var(--s1);cursor:pointer;opacity:0;transform:translateY(10px);transition:opacity .4s,transform .4s}
+.c.l{opacity:1;transform:none}
+.c img{width:100%;height:100%;display:block;object-fit:cover}
+.c .b,.c .h{position:absolute;display:none;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:99px;align-items:center;justify-content:center}
+.c .b{left:8px;bottom:8px;width:26px;height:26px}
+.c .h{right:8px;top:8px;width:26px;height:26px}
+.c .b svg,.c .h svg{width:14px;height:14px}
+.c .h svg{fill:#fff;stroke:#fff}
+.c .b{display:flex}
+.c.f .h{display:flex}
+#s{text-align:center;color:var(--mu);padding:28px;font-size:13px}
+.sp{display:inline-block;width:22px;height:22px;border:2px solid #2a2a2a;border-top-color:#fff;border-radius:50%;animation:r .7s linear infinite}
+@keyframes r{to{transform:rotate(1turn)}}
+nav{position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:6;display:flex;gap:2px;padding:6px;background:rgba(28,28,28,.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--ln);border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 16px;border-radius:18px;color:var(--mu);font-size:11px;transition:.2s}
+nav button.on{background:var(--tx);color:#000}
+#v{position:fixed;inset:0;z-index:10;background:#000;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s;overflow:hidden}
+#v.o{opacity:1;pointer-events:auto}
+#bg{position:absolute;inset:-60px;background:center/cover;filter:blur(50px) brightness(.4)}
+#v>*:not(#bg){position:relative}
+#vt{display:flex;justify-content:space-between;align-items:center;padding:max(12px,env(safe-area-inset-top)) 12px 0}
+#cn{font-size:13px;color:rgba(255,255,255,.7)}
+.ib{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;transition:.2s}
+.ib:active{transform:scale(.92)}
+.ib.on{background:#fff;color:#000}
+.ib.on svg{fill:currentColor}
+#m{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px}
+#m img,#m video{max-width:100%;max-height:100%;border-radius:14px;object-fit:contain}
+#tg{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;scrollbar-width:none}
+#tg::-webkit-scrollbar{display:none}
+.t{flex:none;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.12);font-size:13px;cursor:pointer;white-space:nowrap}
+#ac{display:flex;justify-content:center;gap:14px;padding:6px 12px calc(16px + env(safe-area-inset-bottom))}
+#ac .ib{width:56px;height:56px}
+#p{position:fixed;inset:0;z-index:12;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.25s;display:flex;align-items:flex-end}
+#p.o{opacity:1;pointer-events:auto}
+#sh{width:100%;max-height:88vh;overflow:auto;background:var(--s1);border-radius:26px 26px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));transform:translateY(40px);transition:.3s;border:1px solid var(--ln)}
+#p.o #sh{transform:none}
+#sh h3{font-size:12px;color:var(--mu);font-weight:500;margin:20px 0 8px;text-transform:uppercase;letter-spacing:.07em}
+#sh h3:first-child{margin-top:0}
+#sh .t{background:var(--s2)}
+#iw{display:flex;gap:6px;flex-wrap:wrap}
+textarea{width:100%;background:var(--s2);border:1px solid var(--ln);border-radius:14px;color:var(--tx);padding:12px;font:inherit;outline:0;resize:none}
+.pb{height:50px;border-radius:16px;background:var(--tx);color:#000;width:100%;font-weight:600;margin-top:18px}
+.pb.g{background:var(--s2);color:var(--tx);margin-top:10px}
+#ts{position:fixed;top:16px;left:50%;transform:translate(-50%,-20px);z-index:20;background:#fff;color:#000;padding:8px 16px;border-radius:99px;font-size:13px;opacity:0;transition:.25s;pointer-events:none}
+#ts.o{opacity:1;transform:translate(-50%,0)}
 </style></head><body>
 <header>
-<input id="q" placeholder="теги через пробел" autocomplete="off">
-<select id="sr"><option value="gr">gel+r34</option><option value="g">gel</option><option value="r">r34</option></select>
-<button id="m1">лента</button><button id="m2">для тебя</button><button id="m3">♥</button><button id="m4">⚙</button>
+<div class="sb"><span data-i="search"></span><input id="q" placeholder="Поиск по тегам" autocomplete="off" autocapitalize="none" enterkeyhint="search"></div>
+<div class="seg"><button data-s="gr">Все</button><button data-s="g">Gelbooru</button><button data-s="r">Rule34</button></div>
 </header>
 <div id="g"></div><div id="s"></div>
-<div id="v"><div id="m"></div><div id="tg"></div>
-<div id="bar"><button id="pv">←</button><button id="nx">→</button><button id="fv">♡</button><button id="hd">−</button><button id="dl">⬇</button><button id="cl">✕</button></div></div>
-<div id="p"><button id="pc">✕</button>
-<p>блэклист (через пробел)</p><textarea id="bt" rows="4" style="width:100%"></textarea>
-<p>теги несовершеннолетних скрыты всегда, отключить нельзя</p>
-<p>интересы</p><div id="iw"></div><br><button id="rs">сбросить интересы</button></div>
+<nav>
+<button id="m1"><span data-i="grid"></span>Лента</button>
+<button id="m2"><span data-i="spark"></span>Для тебя</button>
+<button id="m3"><span data-i="heart"></span>Избранное</button>
+<button id="m4"><span data-i="set"></span>Ещё</button>
+</nav>
+<div id="v"><div id="bg"></div>
+<div id="vt"><button class="ib" id="cl" data-i="x"></button><span id="cn"></span><button class="ib" id="dl" data-i="dl"></button></div>
+<div id="m"></div><div id="tg"></div>
+<div id="ac"><button class="ib" id="pv" data-i="l"></button><button class="ib" id="hd" data-i="no"></button><button class="ib" id="fv" data-i="heart"></button><button class="ib" id="nx" data-i="r"></button></div>
+</div>
+<div id="p"><div id="sh">
+<h3>Блэклист</h3><textarea id="bt" rows="3" placeholder="теги через пробел"></textarea>
+<h3>Скрыто всегда</h3><div style="color:var(--mu);font-size:13px">Теги несовершеннолетних фильтруются, отключить нельзя</div>
+<h3>Интересы · тап чтобы убрать</h3><div id="iw"></div>
+<button class="pb g" id="rs">Сбросить интересы</button><button class="pb" id="pc">Готово</button>
+</div></div>
+<div id="ts"></div>
 <script>
+const $=i=>document.getElementById(i);
+onerror=m=>{$('s').textContent='js: '+m};
 const K={g:'&api_key=2080913096926a4a210533cb83f92bef9ef1fe0ea859233a38211c7bd3fd1a9325ce86af8ee07b74bc469b184ff5847159f319074320fb61e12aeeb0a96a8efb&user_id=1921952',r:'&api_key=548d3eb8ce4e9f0076f49ada5b5474c5ba40ed933b3c2fed8a3f445270e50005ad12fef35e27b503a7ba92112b74806364a79caa54fc549660ed8c7b2de203a3&user_id=5586060'};
 const B={g:'https://gelbooru.com/index.php?page=dapi&s=post&q=index',r:'https://api.rule34.xxx/index.php?page=dapi&s=post&q=index'};
 const PROXY='';
 const px=u=>PROXY?PROXY+encodeURIComponent(u):u;
-const $=i=>document.getElementById(i);
+const P={search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',spark:'<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',set:'<path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11"/><circle cx="16" cy="6" r="2.5"/><circle cx="10" cy="12" r="2.5"/><circle cx="18" cy="18" r="2.5"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',dl:'<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',l:'<path d="m15 5-7 7 7 7"/>',r:'<path d="m9 5 7 7-7 7"/>',no:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',play:'<path d="M8 5v14l11-7z" fill="currentColor"/>'};
+const ic=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
+document.querySelectorAll('[data-i]').forEach(e=>e.insertAdjacentHTML('afterbegin',ic(P[e.dataset.i])));
 const ls=(k,d)=>{try{return JSON.parse(localStorage[k])??d}catch{return d}};
 const sv=(k,v)=>{try{localStorage[k]=JSON.stringify(v)}catch{}};
 let fav=ls('fav',{}),bl=ls('bl',[]),W=ls('w',{});
@@ -52,18 +104,29 @@ const LOCK=/loli|shota|underage|toddler|preteen|prepubescent|pedo/;
 const LX=new Set(['child','children','kid','kids','cub','baby','infant','minor','young','kindergarten']);
 const SKIP=/^(highres|absurdres|tagme|solo|1girl|1boy|animated|video|sound|mp4|webm|animated_gif)$/;
 const S={mode:'feed',q:'',src:'gr',pg:{g:0,r:0},end:{g:0,r:0},busy:0,seen:new Set(),list:[],gen:0};
+const EL=new Map();
 const vid=f=>/\.(mp4|webm)(\?|$)/i.test(f);
-const norm=(p,s)=>{const f=p.file_url;if(!f)return null;return{k:s+p.id,s,id:p.id,f,sm:p.sample_url||f,pv:p.preview_url||p.sample_url||f,t:(p.tags||'').trim().split(/\s+/).filter(Boolean)}};
+const norm=(p,s)=>{const f=p.file_url;if(!f)return null;return{k:s+p.id,s,id:p.id,f,sm:p.sample_url||f,pv:p.preview_url||p.sample_url||f,w:+p.width||0,h:+p.height||0,t:(p.tags||'').trim().split(/\s+/).filter(Boolean)}};
 const bad=p=>p.t.some(t=>LOCK.test(t)||LX.has(t)||bl.includes(t));
 const score=p=>p.t.reduce((a,t)=>a+(W[t]||0),0);
 const bump=(p,v)=>{p.t.forEach(t=>{if(SKIP.test(t)||LOCK.test(t)||LX.has(t))return;W[t]=Math.max(-5,Math.min(50,(W[t]||0)+v))});sv('w',W)};
-const top=()=>Object.entries(W).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,10);
-function pickTags(){const pool=top();if(!pool.length)return'';const a=[];for(let i=0;i<2&&pool.length;i++){const tot=pool.reduce((x,y)=>x+y[1],0);let r=Math.random()*tot,j=0;while(j<pool.length-1&&(r-=pool[j][1])>0)j++;a.push(pool.splice(j,1)[0][0])}return a.join(' ')}
+const topT=()=>Object.entries(W).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,10);
+function pickTags(){const pool=topT();if(!pool.length)return'';const a=[];for(let i=0;i<2&&pool.length;i++){const tot=pool.reduce((x,y)=>x+y[1],0);let r=Math.random()*tot,j=0;while(j<pool.length-1&&(r-=pool[j][1])>0)j++;a.push(pool.splice(j,1)[0][0])}return a.join(' ')}
+let tt;
+const toast=t=>{$('ts').textContent=t;$('ts').classList.add('o');clearTimeout(tt);tt=setTimeout(()=>$('ts').classList.remove('o'),1600)};
 async function fetchSrc(s,q,pid){try{const r=await fetch(px(`${B[s]}&json=1&limit=40&pid=${pid}&tags=${encodeURIComponent(q)}${K[s]}`));const t=await r.text();if(!t.trim())return[];const j=JSON.parse(t);return(Array.isArray(j)?j:j.post||[]).map(p=>norm(p,s)).filter(Boolean)}catch(e){console.error(s,e);return null}}
-function card(p){S.list.push(p);const d=document.createElement('div');d.className='c';d.innerHTML=`<img loading="lazy" referrerpolicy="no-referrer" src="${p.pv}">${vid(p.f)?'<span class="b">▶</span>':''}`;d.onclick=()=>show(S.list.indexOf(p));$('g').append(d)}
+function card(p){
+S.list.push(p);
+const d=document.createElement('div');
+EL.set(p.k,d);
+d.className='c'+(fav[p.k]?' f':'');
+if(p.w&&p.h)d.style.aspectRatio=p.w+'/'+p.h;
+d.innerHTML=`<img loading="lazy" referrerpolicy="no-referrer" src="${p.pv}" onload="this.parentNode.classList.add('l')" onerror="this.parentNode.classList.add('l')">${vid(p.f)?`<span class="b">${ic(P.play)}</span>`:''}<span class="h">${ic(P.heart)}</span>`;
+d.onclick=()=>show(S.list.indexOf(p));
+$('g').append(d)}
 async function more(){
 if(S.busy||S.mode==='fav')return;
-S.busy=1;$('s').textContent='...';
+S.busy=1;$('s').innerHTML='<i class="sp"></i>';
 const gn=S.gen;let n=0,t=0,err=0;
 while(n<12&&t++<4){
 const ss=[...S.src].filter(s=>!S.end[s]);if(!ss.length)break;
@@ -81,41 +144,50 @@ if(y)f.sort((a,b)=>score(b)-score(a));
 f.forEach(card);n+=f.length}
 S.busy=0;
 const alive=[...S.src].some(s=>!S.end[s]);
-$('s').textContent=err?'ошибка, нужен PROXY?':(!alive?'конец':'');
+$('s').textContent=err?'Ошибка загрузки (CORS? нужен PROXY)':(!alive?(S.list.length?'Это всё':'Ничего не найдено'):'');
 if(n)chk()}
 const chk=()=>{if(innerHeight+scrollY>document.body.scrollHeight-1200)more()};
 onscroll=chk;
-function mark(){[['feed','m1'],['you','m2'],['fav','m3']].forEach(([m,i])=>$(i).classList.toggle('on',S.mode===m))}
+function mark(){
+[['feed','m1'],['you','m2'],['fav','m3']].forEach(([m,i])=>$(i).classList.toggle('on',S.mode===m));
+document.querySelectorAll('.seg button').forEach(b=>b.classList.toggle('on',b.dataset.s===S.src))}
 function go(){
-S.gen++;S.busy=0;S.pg={g:0,r:0};S.end={g:0,r:0};S.seen=new Set();S.list=[];$('g').innerHTML='';scrollTo(0,0);$('s').textContent='';
-if(S.mode==='fav'){const q=S.q.split(/\s+/).filter(Boolean);Object.values(fav).reverse().filter(p=>q.every(t=>p.t.includes(t))).forEach(card);$('s').textContent=S.list.length?'':'пусто';return}
+S.gen++;S.busy=0;S.pg={g:0,r:0};S.end={g:0,r:0};S.seen=new Set();S.list=[];EL.clear();$('g').innerHTML='';scrollTo(0,0);$('s').textContent='';
+if(S.mode==='fav'){const q=S.q.split(/\s+/).filter(Boolean);Object.values(fav).reverse().filter(p=>q.every(t=>p.t.includes(t))).forEach(card);$('s').textContent=S.list.length?'':'Пока пусто';return}
 more()}
-$('q').onkeydown=e=>{if(e.key==='Enter'){S.q=$('q').value.trim();if(S.mode==='fav'&&!S.q){}go();e.target.blur()}};
-$('sr').onchange=e=>{S.src=e.target.value;go()};
+$('q').onkeydown=e=>{if(e.key==='Enter'){S.q=$('q').value.trim();go();e.target.blur()}};
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{S.src=b.dataset.s;mark();go()});
 [['m1','feed'],['m2','you'],['m3','fav']].forEach(([i,m])=>$(i).onclick=()=>{S.mode=m;mark();go()});
 let ci=0;
 function show(i){
 const p=S.list[i];if(!p)return;ci=i;
 $('v').classList.add('o');
+$('bg').style.backgroundImage=`url("${p.pv}")`;
 $('m').innerHTML=vid(p.f)?`<video src="${p.f}" controls autoplay muted loop playsinline></video>`:`<img referrerpolicy="no-referrer" src="${p.sm}">`;
-$('tg').innerHTML=p.t.map(t=>`<span class="t">${t}</span>`).join('');
-[...$('tg').children].forEach(e=>e.onclick=()=>{hide();$('q').value=S.q=e.textContent;if(S.mode==='fav')S.mode='feed';mark();go()});
-$('fv').textContent=fav[p.k]?'♥':'♡';
+$('cn').textContent=(p.s==='g'?'gelbooru':'rule34')+' · '+p.id;
+$('tg').replaceChildren(...p.t.map(t=>{const e=document.createElement('span');e.className='t';e.textContent=t;e.onclick=()=>{hide();$('q').value=S.q=t;if(S.mode==='fav')S.mode='feed';mark();go()};return e}));
+$('tg').scrollLeft=0;
+$('fv').classList.toggle('on',!!fav[p.k]);
 bump(p,.5);
 if(i>S.list.length-6)more()}
-function hide(){$('v').classList.remove('o');$('m').innerHTML=''}
+function hide(){$('v').classList.remove('o');setTimeout(()=>{if(!$('v').classList.contains('o'))$('m').innerHTML=''},250)}
 const nav=d=>show(ci+d);
 $('pv').onclick=()=>nav(-1);$('nx').onclick=()=>nav(1);$('cl').onclick=hide;
-$('fv').onclick=()=>{const p=S.list[ci];if(fav[p.k]){delete fav[p.k];bump(p,-3)}else{fav[p.k]=p;bump(p,3)}sv('fav',fav);$('fv').textContent=fav[p.k]?'♥':'♡'};
+$('fv').onclick=()=>{const p=S.list[ci];if(fav[p.k]){delete fav[p.k];bump(p,-3)}else{fav[p.k]=p;bump(p,3)}sv('fav',fav);$('fv').classList.toggle('on',!!fav[p.k]);EL.get(p.k)?.classList.toggle('f',!!fav[p.k])};
 $('hd').onclick=()=>{bump(S.list[ci],-2);nav(1)};
-$('dl').onclick=async()=>{const p=S.list[ci];const n=p.f.split('/').pop().split('?')[0];try{let r;try{r=await fetch(p.f)}catch{r=await fetch(px(p.f))}const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e4)}catch{window.open(p.f,'_blank')}};
+$('dl').onclick=async()=>{const p=S.list[ci];const n=p.f.split('/').pop().split('?')[0];toast('Скачиваю...');try{let r;try{r=await fetch(p.f)}catch{r=await fetch(px(p.f))}const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1e4);toast('Сохранено')}catch{window.open(p.f,'_blank')}};
 onkeydown=e=>{if(!$('v').classList.contains('o'))return;if(e.key==='ArrowRight')nav(1);if(e.key==='ArrowLeft')nav(-1);if(e.key==='Escape')hide()};
 let tx=0;
 $('m').ontouchstart=e=>tx=e.touches[0].clientX;
 $('m').ontouchend=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)nav(d<0?1:-1)};
-function ints(){$('iw').innerHTML=top().map(([t,w])=>`<span class="t">${t} ${w.toFixed(1)}</span>`).join('')||'пока пусто'}
+function ints(){
+const t=topT();
+if(!t.length){$('iw').innerHTML='<span style="color:var(--mu);font-size:13px">пока пусто</span>';return}
+$('iw').replaceChildren(...t.map(([k,w])=>{const e=document.createElement('span');e.className='t';e.textContent=k+' '+w.toFixed(1);e.onclick=()=>{delete W[k];sv('w',W);ints()};return e}))}
 $('m4').onclick=()=>{$('bt').value=bl.join(' ');ints();$('p').classList.add('o')};
-$('pc').onclick=()=>{bl=$('bt').value.trim().split(/\s+/).filter(Boolean);sv('bl',bl);$('p').classList.remove('o');go()};
+function closeP(){const n=$('bt').value.trim().split(/\s+/).filter(Boolean);$('p').classList.remove('o');if(n.join(' ')!==bl.join(' ')){bl=n;sv('bl',bl);go()}}
+$('pc').onclick=closeP;
+$('p').onclick=e=>{if(e.target===$('p'))closeP()};
 $('rs').onclick=()=>{W={};sv('w',W);ints()};
 mark();go();
 </script></body></html>
