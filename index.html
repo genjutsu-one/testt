@@ -29,16 +29,16 @@ body.gv #fd{display:none}body:not(.gv) #g{display:none}
 .f{position:relative;height:100vh;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:#000}
 .f::after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,rgba(0,0,0,.8));pointer-events:none}
 .fb{position:absolute;inset:-40px;background:center/cover;filter:blur(40px) brightness(.5);transform:scale(1.1)}
-.fm{position:absolute;inset:0;display:grid;place-items:center}
+.fm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:calc(76px + env(safe-area-inset-top)) 0 calc(176px + env(safe-area-inset-bottom))}
 .fm img,.fm video{max-width:100%;max-height:100%;object-fit:contain;filter:blur(10px);transform:scale(1.02);transition:filter .6s var(--ez),transform .7s var(--ez)}
 .fm img.ok,.fm video{filter:none;transform:none}
-.rl{position:absolute;z-index:2;right:10px;bottom:calc(112px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.rl{position:absolute;z-index:2;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:12px}
 .ib{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.15);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:grid;place-items:center;transition:background .3s,transform .35s var(--sp)}
 .ib:active{transform:scale(.88)}
 .ib.on svg{fill:var(--hr);stroke:var(--hr);animation:pop .5s var(--sp)}
-.cap{position:absolute;z-index:2;left:0;right:70px;bottom:calc(86px + env(safe-area-inset-bottom))}
+.cap{position:absolute;z-index:2;left:0;right:0;bottom:calc(86px + env(safe-area-inset-bottom))}
 .sr{padding:0 14px 8px;font-weight:700;text-shadow:0 1px 8px #000}
-.tg{display:flex;gap:6px;overflow-x:auto;padding:0 14px;scrollbar-width:none}
+.tg{display:flex;gap:6px;overflow-x:auto;padding:0 40px 0 14px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 44px),transparent)}
 .tg::-webkit-scrollbar{display:none}
 .t{flex:none;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:13px;cursor:pointer;white-space:nowrap;transition:transform .3s var(--sp)}
 .t:active{transform:scale(.92)}
@@ -61,7 +61,7 @@ body.gv #fd{display:none}body:not(.gv) #g{display:none}
 .c .b svg,.c .h svg{width:14px;height:14px}.c .h svg{fill:var(--hr);stroke:var(--hr)}
 .c.f2 .h{display:flex;animation:pop .5s var(--sp)}
 /* статус */
-#s{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:4;max-width:90vw;text-align:center;font-size:13px;padding:8px 16px;border-radius:99px;background:rgba(30,30,30,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#s{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:4;max-width:90vw;text-align:center;font-size:13px;padding:10px 16px;border-radius:18px;background:rgba(30,30,30,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 #s:empty{display:none}#s.mid{bottom:auto;top:46%;transform:translate(-50%,-50%)}#s.er{cursor:pointer}
 .sp{display:inline-block;width:20px;height:20px;border:2px solid #333;border-top-color:#fff;border-radius:50%;animation:r .7s linear infinite;vertical-align:middle}
 @keyframes r{to{transform:rotate(1turn)}}
@@ -88,9 +88,13 @@ textarea,.in{width:100%;background:var(--s2);border:1px solid var(--ln);border-r
 .pb:active{transform:scale(.97)}.pb.g{background:var(--s2);color:var(--tx);margin-top:10px}
 #ts{position:fixed;top:max(70px,calc(env(safe-area-inset-top) + 60px));left:50%;transform:translate(-50%,-30px) scale(.9);z-index:20;background:#fff;color:#000;padding:8px 16px;border-radius:99px;font-size:13px;opacity:0;transition:.4s var(--sp);pointer-events:none}
 #ts.o{opacity:1;transform:translate(-50%,0)}
+#sg{position:absolute;left:10px;right:10px;top:100%;margin-top:-4px;border-radius:18px;overflow:hidden;background:rgba(24,24,24,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--ln)}
+#sg:empty{display:none}
+.sgi{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;cursor:pointer;animation:ci .3s var(--ez) both}
+.sgi:active{background:rgba(255,255,255,.1)}.sgi small{color:var(--mu)}
 /* LIQUID GLASS */
 html.lg body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(60vmax 60vmax at 5% 0,rgba(120,90,255,.4),transparent 60%),radial-gradient(50vmax 50vmax at 100% 45%,rgba(255,70,150,.3),transparent 60%),radial-gradient(60vmax 60vmax at 30% 100%,rgba(40,170,255,.3),transparent 60%)}
-html.lg :is(nav,.sb,.ib,.vb,#sh,.sw,.pb.g,#ts,.cap .t,#iw .t,#s){background:radial-gradient(140px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.34),transparent 65%),linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.06));-webkit-backdrop-filter:blur(18px) saturate(1.8);backdrop-filter:blur(18px) saturate(1.8);border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.1),0 12px 32px rgba(0,0,0,.3);color:#fff}
+html.lg :is(nav,.sb,.ib,.vb,#sh,.sw,.pb.g,#ts,.cap .t,#iw .t,#s,#sg){background:radial-gradient(140px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.34),transparent 65%),linear-gradient(135deg,rgba(255,255,255,.22),rgba(255,255,255,.06));-webkit-backdrop-filter:blur(18px) saturate(1.8);backdrop-filter:blur(18px) saturate(1.8);border:1px solid rgba(255,255,255,.34);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(255,255,255,.1),0 12px 32px rgba(0,0,0,.3);color:#fff}
 html.lg nav{left:14px;right:14px;bottom:max(12px,env(safe-area-inset-bottom));padding:6px;border-radius:30px}
 html.lg nav i{left:6px;width:calc((100% - 12px)/4);background:radial-gradient(60px circle at 30% 0,rgba(255,255,255,.5),transparent 70%),linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,.08));-webkit-backdrop-filter:blur(1px) saturate(1.6) brightness(1.15);backdrop-filter:blur(1px) saturate(1.6) brightness(1.15);backdrop-filter:url(#lgf) saturate(1.6) brightness(1.15);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -1px 0 rgba(255,255,255,.2),0 8px 22px rgba(0,0,0,.25);border-radius:24px}
 html.lg nav button{color:rgba(255,255,255,.75)}html.lg nav button.on{color:#fff}
@@ -98,7 +102,7 @@ html.lg #sh{-webkit-backdrop-filter:blur(34px) saturate(1.7);backdrop-filter:blu
 html.lg #ts,html.lg #s{color:#fff}
 html.lg .sw.on{background:linear-gradient(135deg,rgba(52,199,89,.7),rgba(52,199,89,.4))}
 html.lg .tb button.on::after{background:linear-gradient(90deg,#8a7bff,#ff5fa2,#4ab8ff);box-shadow:0 0 14px rgba(255,95,162,.6)}
-html.lg #s{bottom:calc(100px + env(safe-area-inset-bottom))}
+html.lg #s:not(.mid){bottom:calc(100px + env(safe-area-inset-bottom))}
 html.lg .cap{bottom:calc(92px + env(safe-area-inset-bottom))}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}}
 </style></head><body>
@@ -106,7 +110,7 @@ html.lg .cap{bottom:calc(92px + env(safe-area-inset-bottom))}
 <header id="H"><div class="hr"><button class="vb" id="vb"></button>
 <div class="tb" id="tb"><button data-s="gr">Все</button><button data-s="g">Gelbooru</button><button data-s="r">Rule34</button></div>
 <button class="vb" id="sbt" data-i="search"></button></div>
-<div class="sb"><span data-i="search"></span><input id="q" placeholder="Поиск по тегам" autocomplete="off" autocapitalize="none" enterkeyhint="search"></div></header>
+<div class="sb"><span data-i="search"></span><input id="q" placeholder="Теги через пробел · -тег исключает" autocomplete="off" autocapitalize="none" enterkeyhint="search"></div><div id="sg"></div></header>
 <div id="fd"></div><div id="g"></div><div id="s"></div>
 <nav><i id="nvi"></i>
 <button id="m1"><span data-i="home"></span>Лента</button>
@@ -118,7 +122,7 @@ html.lg .cap{bottom:calc(92px + env(safe-area-inset-bottom))}
 <div class="row"><div><b>Liquid Glass</b><small>Стеклянные панели с бликами и преломлением</small></div><button class="sw" id="lgb"></button></div>
 <h3>Блэклист</h3><textarea id="bt" rows="3" placeholder="теги через пробел"></textarea>
 <h3>Скрыто всегда</h3><div style="color:var(--mu);font-size:13px">Теги несовершеннолетних фильтруются, отключить нельзя</div>
-<h3>Прокси (только если нужен)</h3><input class="in" id="px" placeholder="пусто = напрямую" autocapitalize="none" autocomplete="off">
+<h3>Свой прокси</h3><input class="in" id="px" placeholder="https://xxx.workers.dev/?url=" autocapitalize="none" autocomplete="off"><div style="color:var(--mu);font-size:12px;margin-top:6px">Gelbooru не отдаёт CORS-заголовки, VPN тут не помогает. Без своего прокси используются публичные (твой ключ проходит через них).</div>
 <h3>Интересы · тап чтобы убрать</h3><div id="iw"></div>
 <button class="pb g" id="rs">Сбросить интересы</button><button class="pb" id="pc">Готово</button>
 </div></div>
@@ -129,13 +133,14 @@ onerror=m=>{$('s').className='';$('s').textContent='js: '+m};
 const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const K={g:'&api_key=2080913096926a4a210533cb83f92bef9ef1fe0ea859233a38211c7bd3fd1a9325ce86af8ee07b74bc469b184ff5847159f319074320fb61e12aeeb0a96a8efb&user_id=1921952',r:'&api_key=548d3eb8ce4e9f0076f49ada5b5474c5ba40ed933b3c2fed8a3f445270e50005ad12fef35e27b503a7ba92112b74806364a79caa54fc549660ed8c7b2de203a3&user_id=5586060'};
 const B={g:'https://gelbooru.com/index.php?page=dapi&s=post&q=index',r:'https://api.rule34.xxx/index.php?page=dapi&s=post&q=index'};
+const PX=['https://corsproxy.io/?url=','https://api.allorigins.win/raw?url=','https://api.codetabs.com/v1/proxy?quest='];
 const NM={g:'Gelbooru',r:'Rule34'};
 const P={search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',feed:'<rect x="6" y="2.5" width="12" height="19" rx="3"/>',home:'<path d="M4 11 12 4l8 7v9H4z"/>',spark:'<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>',heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',set:'<path d="M4 6h9M19 6h1M4 12h3M13 12h7M4 18h11"/><circle cx="16" cy="6" r="2.5"/><circle cx="10" cy="12" r="2.5"/><circle cx="18" cy="18" r="2.5"/>',dl:'<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',no:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',play:'<path d="M8 5v14l11-7z" fill="currentColor"/>'};
 const ic=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
 document.querySelectorAll('[data-i]').forEach(e=>e.insertAdjacentHTML('afterbegin',ic(P[e.dataset.i])));
 const ls=(k,d)=>{try{return JSON.parse(localStorage[k])??d}catch{return d}};
 const sv=(k,v)=>{try{localStorage[k]=JSON.stringify(v)}catch{}};
-let fav=ls('fav',{}),bl=ls('bl',[]),W=ls('w',{}),cp=ls('px',''),lg=ls('lg',0);
+let gp=ls('gp',''),fav=ls('fav',{}),bl=ls('bl',[]),W=ls('w',{}),cp=ls('px',''),lg=ls('lg',0);
 const LOCK=/loli|shota|underage|toddler|preteen|prepubescent|pedo/;
 const LX=new Set(['child','children','kid','kids','cub','baby','infant','minor','young','kindergarten']);
 const SKIP=/^(highres|absurdres|tagme|solo|1girl|1boy|animated|video|sound|mp4|webm|animated_gif)$/;
@@ -150,18 +155,22 @@ const topT=()=>Object.entries(W).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(
 function pickTags(){const pool=topT();if(!pool.length)return'';const a=[];for(let i=0;i<2&&pool.length;i++){const tot=pool.reduce((x,y)=>x+y[1],0);let r=Math.random()*tot,j=0;while(j<pool.length-1&&(r-=pool[j][1])>0)j++;a.push(pool.splice(j,1)[0][0])}return a.join(' ')}
 let tt;
 const toast=t=>{$('ts').textContent=t;$('ts').classList.add('o');clearTimeout(tt);tt=setTimeout(()=>$('ts').classList.remove('o'),1600)};
-const wrap=u=>cp?(cp.includes('{url}')?cp.replace('{url}',encodeURIComponent(u)):cp+encodeURIComponent(u)):u;
+const wrapP=(p,u)=>p?(p.includes('{url}')?p.replace('{url}',encodeURIComponent(u)):p+encodeURIComponent(u)):u;
+const wrap=u=>wrapP(cp,u);
+const proxies=s=>cp?[cp]:s==='g'?(gp?[gp,...['',...PX].filter(x=>x!==gp)]:['',...PX]):[''];
 /* запрос напрямую; если с ключом не вышло — повтор без ключа; причина ошибки показывается */
 async function fetchSrc(s,q,pid){
 const u=k=>`${B[s]}&json=1&limit=40&pid=${pid}&tags=${encodeURIComponent(q)}${k}`;
 let e='';
+for(const p of proxies(s)){
 for(const k of [K[s],'']){
 const c=new AbortController(),t=setTimeout(()=>c.abort(),8000);
-try{const r=await fetch(wrap(u(k)),{signal:c.signal});clearTimeout(t);const x=(await r.text()).trim();
+try{const r=await fetch(wrapP(p,u(k)),{signal:c.signal});clearTimeout(t);const x=(await r.text()).trim();
 if(!r.ok){e='HTTP '+r.status;continue}
 let j=[];if(x){try{j=JSON.parse(x)}catch{e='не JSON: '+x.slice(0,50).replace(/\s+/g,' ');continue}}
+if(s==='g'&&p!==gp){gp=p;sv('gp',p)}
 return{a:(Array.isArray(j)?j:j.post||[]).map(o=>norm(o,s)).filter(Boolean)}}
-catch(x){clearTimeout(t);e=x.name==='AbortError'?'таймаут 8с':'сеть/CORS'}}
+catch(x){clearTimeout(t);e=x.name==='AbortError'?'таймаут 8с':'сеть/CORS';break}}}
 return{e}}
 /* карточка: ячейка сетки + слайд ленты */
 function card(p){
@@ -205,7 +214,7 @@ f.forEach(p=>S.seen.add(p.k));
 if(y)f.sort((a,b)=>score(b)-score(a));
 S.k=0;f.forEach(card);n+=f.length}
 S.busy=0;
-const er=Object.entries(S.er).map(([s,m])=>NM[s]+': '+m);
+const er=Object.entries(S.er).map(([s,m])=>NM[s]+': '+m+(m==='сеть/CORS'?' (нужен прокси)':''));
 const alive=[...S.src].some(s=>!S.end[s]);
 $('s').className=(S.list.length?'':'mid')+(er.length?' er':'');
 $('s').textContent=er.length?er.join(' · ')+' — тап, чтобы повторить':(!alive?(S.list.length?'':'Ничего не найдено'):'');
@@ -227,7 +236,23 @@ function go(){
 S.gen++;S.busy=0;S.pg={g:0,r:0};S.end={g:0,r:0};S.er={};S.seen=new Set();S.list=[];S.k=0;cur=0;EL.clear();$('g').innerHTML='';FD.innerHTML='';FD.scrollTop=0;scrollTo(0,0);$('s').className='';$('s').textContent='';
 if(S.mode==='fav'){const q=S.q.split(/\s+/).filter(Boolean);Object.values(fav).reverse().filter(p=>q.every(t=>p.t.includes(t))).forEach(card);if(!S.list.length){$('s').className='mid';$('s').textContent='Пока пусто'}return}
 more()}
-$('q').onkeydown=e=>{if(e.key==='Enter'){S.q=$('q').value.trim();go();e.target.blur()}};
+$('q').onkeydown=e=>{if(e.key==='Enter'){S.q=$('q').value.trim();$('sg').replaceChildren();go();e.target.blur()}};
+let sgT,sgN=0;
+$('q').oninput=()=>{clearTimeout(sgT);sgT=setTimeout(suggest,180)};
+$('q').onfocus=suggest;
+$('q').onblur=()=>setTimeout(()=>$('sg').replaceChildren(),150);
+function showSg(list,v,neg){$('sg').replaceChildren(...list.slice(0,7).map(o=>{const d=document.createElement('div');d.className='sgi';d.innerHTML='<span></span><small></small>';d.firstChild.textContent=neg+o.v;d.lastChild.textContent=o.c;d.onpointerdown=e=>{e.preventDefault();$('q').value=v.replace(/(-?)[^\s]*$/,'$1'+o.v+' ');suggest()};return d}))}
+async function suggest(){
+const v=$('q').value,m=v.match(/(-?)([^\s]*)$/),neg=m[1],tok=m[2].toLowerCase(),n=++sgN;
+const ok=t=>!LOCK.test(t)&&!LX.has(t);
+if(!tok){showSg(topT().filter(x=>ok(x[0])).map(x=>({v:x[0],c:'интерес'})),v,'');return}
+if(tok.length<2){$('sg').replaceChildren();return}
+const c={};S.list.forEach(p=>p.t.forEach(t=>c[t]=(c[t]||0)+1));Object.values(fav).forEach(p=>p.t.forEach(t=>c[t]=(c[t]||0)+2));
+const loc=Object.keys(c).filter(t=>t.startsWith(tok)&&ok(t)).sort((a,b)=>c[b]-c[a]).slice(0,4).map(t=>({v:t,c:''}));
+showSg(loc,v,neg);
+try{const r=await fetch('https://api.rule34.xxx/autocomplete.php?q='+encodeURIComponent(tok));const j=await r.json();if(n!==sgN)return;
+const rem=j.filter(x=>ok(x.value)).map(x=>({v:x.value,c:((x.label||'').match(/\((\d+)\)\s*$/)||[])[1]||''}));
+const seen=new Set(rem.map(x=>x.v));showSg([...rem,...loc.filter(x=>!seen.has(x.v))],v,neg)}catch{}}
 $('sbt').onclick=()=>{const h=$('H');h.classList.toggle('sr');if(h.classList.contains('sr'))setTimeout(()=>$('q').focus(),150)};
 document.querySelectorAll('#tb button').forEach(b=>b.onclick=()=>{S.src=b.dataset.s;mark();go()});
 [['m1','feed'],['m2','you'],['m3','fav']].forEach(([i,m])=>$(i).onclick=()=>{if(S.mode===m&&S.view==='grid')scrollTo({top:0,behavior:'smooth'});S.mode=m;mark();go()});
