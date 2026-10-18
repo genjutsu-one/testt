@@ -13,7 +13,8 @@
 html,body{height:100%}
 body{background:radial-gradient(900px 500px at 80% -10%,#251a40,transparent 60%),var(--bg);color:var(--text);font:15px/1.55 system-ui,'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
 header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(14,13,18,.85);backdrop-filter:blur(10px)}
-header h1{font-size:16px;font-weight:600;flex:1}
+header h1{font-size:16px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tick{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
 .btn:hover{border-color:var(--accent)}
 .btn svg{width:16px;height:16px;flex:none}
@@ -32,7 +33,7 @@ header h1{font-size:16px;font-weight:600;flex:1}
 .ai pre code{padding:0;background:none}
 .copy{position:absolute;top:6px;right:6px;font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
 .acts{display:flex;gap:6px;margin-top:8px;opacity:0;transition:opacity .15s}
-.msg.ai:hover .acts,.msg.ai:focus-within .acts{opacity:1}
+.msg.ai:hover .acts,.msg.ai:focus-within .acts,.msg.user:hover .acts,.msg.user:focus-within .acts{opacity:1}
 @media(hover:none){.acts{opacity:.75}}
 .acts button{background:none;border:1px solid var(--line);border-radius:7px;color:var(--muted);cursor:pointer;padding:3px 7px;display:flex;align-items:center}
 .acts button:hover{color:var(--text);border-color:var(--accent)}
@@ -89,7 +90,7 @@ dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
 </style>
 </head>
 <body>
-<header><button class='btn' id='chats' aria-label='Чаты'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg></button><h1>Чат с ИИ</h1><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
+<header><button class='btn' id='chats' aria-label='Чаты'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg></button><h1>Чат с ИИ</h1><span id='tick'></span><button class='btn' id='temp' title='Временный чат — ничего не сохраняется'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='13' r='8'/><path d='M12 9v4l2.5 2.5M5 3 2 6m17-3 3 3'/></svg></button><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
 <aside id='side'><div class='side-head'><b>Чаты</b><button class='btn' id='side-new'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Новый</button></div><input id='chat-q' type='text' placeholder='Поиск по чатам…'><div id='chatlist'></div></aside>
 <div id='scrim'></div>
 <main id='log'></main>
@@ -139,13 +140,14 @@ gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1
 file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
 x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
 redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>',
-copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>'
 };
 const BUILTIN=[
 {type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
 {type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}}
 ];
-let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false;
+let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false,tempChat=false,tickT=null;
 function loadCfg(){try{return {...DEF,...JSON.parse(localStorage.getItem('chat-cfg')||'{}')}}catch{return {...DEF}}}
 function saveCfg(){try{localStorage.setItem('chat-cfg',JSON.stringify(cfg))}catch{}}
 function loadHist(){try{return JSON.parse(localStorage.getItem('chat2-hist')||'[]')}catch{return []}}
@@ -158,6 +160,7 @@ const c=chats.find(x=>x.id===cur);if(c)history=c.msgs||[];else cur='';
 }catch{}})();
 function strip(m){return Array.isArray(m.content)?{...m,content:m.content.map(p=>p.type==='image_url'?{type:'text',text:'[фото]'}:p)}:m}
 function saveHist(){
+if(tempChat)return;
 try{
 if(history.length){
 let c=chats.find(x=>x.id===cur);
@@ -191,6 +194,12 @@ const bar=document.createElement('div');bar.className='acts';
 const rb=document.createElement('button');rb.innerHTML=IC.redo;rb.title='Сгенерировать заново';rb.onclick=regen;bar.appendChild(rb);
 const cb=document.createElement('button');cb.innerHTML=IC.copy;cb.title='Копировать ответ';cb.onclick=()=>{navigator.clipboard.writeText(lastA.content);cb.style.color='var(--accent)';setTimeout(()=>cb.style.color='',900)};bar.appendChild(cb);
 last.appendChild(bar);
+}
+const uB=log.querySelectorAll('.msg.user');const lastU=uB[uB.length-1];
+if(lastU&&!busy){
+const bar=document.createElement('div');bar.className='acts';bar.style.justifyContent='flex-end';
+const eb=document.createElement('button');eb.innerHTML=IC.edit;eb.title='Изменить и отправить заново';eb.onclick=editLast;bar.appendChild(eb);
+lastU.appendChild(bar);
 }
 scroll();
 }
@@ -230,7 +239,7 @@ function openChat(id){
 if(id===cur){closeSide();return}
 if(busy&&ctrl)ctrl.abort();
 const c=chats.find(x=>x.id===id);if(!c)return;
-cur=id;history=c.msgs||[];
+cur=id;history=c.msgs||[];tempChat=false;$('temp').style.borderColor='';
 try{localStorage.setItem('chat2-cur',cur)}catch{}
 closeSide();renderAll();renderChats();
 }
@@ -419,7 +428,12 @@ const msgs=[];if(cfg.system)msgs.push({role:'system',content:cfg.system});
 history.forEach(({_ui,...m})=>msgs.push(m));
 const body={model:cfg.model,messages:msgs,stream:true};
 const tl=cfg.tools?[...BUILTIN,...mcpTools.map(t=>t.def)]:[];if(tl.length)body.tools=tl;
-const res=await fetch(base()+'/chat/completions',{method:'POST',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)});
+let res=null,err=null;
+for(let a=0;a<2&&!res;a++){
+try{res=await fetch(base()+'/chat/completions',{method:'POST',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)})}
+catch(e){err=e;await new Promise(r=>setTimeout(r,800))}
+}
+if(!res)throw err;
 if(!res.ok)throw new Error('HTTP '+res.status+': '+(await res.text()).slice(0,300));
 const live=document.createElement('div');live.className='msg ai';live.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
 $('log').appendChild(live);scroll();
@@ -439,7 +453,12 @@ for(const tc of dl.tool_calls||[]){const c=calls[tc.index||0]||(calls[tc.index||
 }finally{live.remove()}
 return {content,calls:calls.filter(Boolean)};
 }
-function setBusy(b){busy=b;$('send').innerHTML=b?IC.stop:IC.send}
+function setBusy(b){
+busy=b;$('send').innerHTML=b?IC.stop:IC.send;
+const t=$('tick');
+if(b){const t0=Date.now();t.textContent='…';tickT=setInterval(()=>{t.textContent=((Date.now()-t0)/1000).toFixed(0)+'с'},500)}
+else{clearInterval(tickT);const c=chats.find(x=>x.id===cur);t.textContent=tempChat?'временный чат — не сохраняется':(c?c.title:'')}
+}
 function stripImages(){
 for(let i=history.length-1;i>=0;i--){
 const m=history[i];
@@ -481,6 +500,14 @@ if(busy)return;
 while(history.length&&history[history.length-1].role!=='user')history.pop();
 if(!history.length){renderAll();return}
 renderAll();agent();
+}
+function editLast(){
+if(busy)return;
+const m=history[history.length-1];
+if(!m||m.role!=='user')return;
+const t=m._ui?m._ui.text:(typeof m.content==='string'?m.content:'');
+if(t!=null)$('input').value=t;
+history.pop();fit();renderAll();$('input').focus();
 }
 async function send(){
 const inp=$('input');const text=inp.value.trim();
@@ -552,11 +579,31 @@ await connectMcp();
 
 $('models').innerHTML=MODELS.map(m=>'<option value='+m+'>').join('');
 $('new').onclick=newChat;
+$('temp').onclick=()=>{
+if(tempChat){tempChat=false;cur='';try{localStorage.removeItem('chat2-cur')}catch{}}
+else{tempChat=true;history=[];cur='';try{localStorage.removeItem('chat2-cur')}catch{}}
+$('temp').style.borderColor=tempChat?'var(--accent)':'';
+$('tick').textContent=tempChat?'временный чат — не сохраняется':'';
+renderAll();renderChats();
+toast(tempChat?'Временный чат: история не сохраняется':'Временный чат выключен');
+};
 $('chats').onclick=()=>{renderChats();$('side').classList.add('open');$('scrim').classList.add('open')};
 $('scrim').onclick=closeSide;
 $('side-new').onclick=newChat;
 $('chat-q').addEventListener('input',renderChats);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSide()});
+document.addEventListener('keydown',e=>{
+if(e.key==='Escape'){closeSide();return}
+if(e.key==='ArrowUp'&&document.activeElement===$('input')&&!$('input').value.trim()){e.preventDefault();editLast()}
+});
+let sx=0,sy=0;
+document.addEventListener('touchstart',e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY},{passive:true});
+document.addEventListener('touchend',e=>{
+const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+if(Math.abs(dy)>60||Math.abs(dx)<60)return;
+const open=$('side').classList.contains('open');
+if(dx>60&&sx<60&&!open){renderChats();$('side').classList.add('open');$('scrim').classList.add('open')}
+if(dx<-60&&open)closeSide();
+},{passive:true});
 $('attach').onclick=()=>$('file').click();
 $('file').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
 document.addEventListener('paste',e=>{const fs=[...(e.clipboardData?e.clipboardData.files:[])];if(fs.length){e.preventDefault();addFiles(fs)}});
@@ -572,6 +619,7 @@ const q=new URLSearchParams(location.search);
 if(q.get('code')&&q.get('state'))await finishOauth(q);
 else if(q.get('error')){toast('OAuth: '+q.get('error'),true);history_clean()}
 renderAll();renderChats();
+const c=chats.find(x=>x.id===cur);if(c)$('tick').textContent=c.title||'';
 if(!cfg.key)setTimeout(openSet,300);
 if(cfg.mcp)connectMcp();
 })();
