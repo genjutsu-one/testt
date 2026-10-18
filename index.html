@@ -14,8 +14,9 @@ html,body{height:100%}
 body{background:radial-gradient(900px 500px at 80% -10%,#251a40,transparent 60%),var(--bg);color:var(--text);font:15px/1.55 system-ui,'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
 header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(14,13,18,.85);backdrop-filter:blur(10px)}
 header h1{font-size:16px;font-weight:600;flex:1}
-.btn{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
 .btn:hover{border-color:var(--accent)}
+.btn svg{width:16px;height:16px;flex:none}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #log{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px}
 .msg{max-width:min(760px,92%);padding:10px 14px;border-radius:16px;border:1px solid var(--line);overflow-wrap:anywhere}
@@ -30,10 +31,18 @@ header h1{font-size:16px;font-weight:600;flex:1}
 .ai pre{position:relative;background:#0b0a0f;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
 .ai pre code{padding:0;background:none}
 .copy{position:absolute;top:6px;right:6px;font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.acts{display:flex;gap:6px;margin-top:8px;opacity:0;transition:opacity .15s}
+.msg.ai:hover .acts,.msg.ai:focus-within .acts{opacity:1}
+@media(hover:none){.acts{opacity:.75}}
+.acts button{background:none;border:1px solid var(--line);border-radius:7px;color:var(--muted);cursor:pointer;padding:3px 7px;display:flex;align-items:center}
+.acts button:hover{color:var(--text);border-color:var(--accent)}
+.acts svg{width:13px;height:13px}
 .user img{display:block;max-width:100%;max-height:260px;border-radius:10px;margin-bottom:6px}
 .tag{display:inline-block;font-size:12px;background:#0b0a0f66;border:1px solid #ffffff22;border-radius:8px;padding:1px 8px;margin:0 4px 4px 0}
+.tag svg{width:12px;height:12px;vertical-align:-2px;margin-right:5px}
 details.tool{align-self:flex-start;max-width:min(760px,92%);font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;padding:6px 12px}
-details.tool summary{cursor:pointer}
+details.tool summary{cursor:pointer;display:flex;align-items:center;gap:7px}
+details.tool summary svg{width:14px;height:14px;flex:none}
 details.tool pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:240px;overflow:auto;color:var(--text)}
 .empty{margin:auto;text-align:center;color:var(--muted);line-height:1.7;padding:0 20px}
 #bar{border-top:1px solid var(--line);background:rgba(14,13,18,.85);padding:10px 14px}
@@ -41,11 +50,13 @@ details.tool pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;wor
 #chips:not(:empty){margin-bottom:8px}
 .chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 6px 4px 8px;font-size:12.5px}
 .chip img{width:28px;height:28px;object-fit:cover;border-radius:6px}
-.chip button{background:none;border:0;color:var(--muted);font-size:16px;cursor:pointer}
+.chip button{display:flex;align-items:center;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px}
+.chip svg{width:13px;height:13px}
 form{display:flex;gap:8px;align-items:flex-end}
 textarea{flex:1;resize:none;max-height:160px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:11px 14px;font:inherit;line-height:1.4}
-.round{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;font-size:18px;flex:none}
-#send{background:var(--accent);color:#1a1230;border:0;font-weight:700}
+.round{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center}
+.round svg{width:19px;height:19px}
+#send{background:var(--accent);color:#1a1230;border:0}
 dialog{margin:auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(460px,94vw);max-height:92vh;overflow:auto}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog h2{font-size:16px;margin-bottom:6px}
@@ -64,25 +75,27 @@ dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:7}
 #scrim.open{opacity:1;pointer-events:auto}
 .side-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+#chat-q{margin:10px 10px 0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;font-size:13px}
 #chatlist{flex:1;overflow-y:auto;padding:8px}
 .chatit{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
 .chatit:hover{border-color:var(--line)}
 .chatit.cur{border-color:var(--accent);background:#b79cff14}
 .chatit .t{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chatit .d{font-size:11px;color:var(--muted);flex:none}
-.chatit .x{background:none;border:0;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 5px;flex:none}
+.chatit .x{display:flex;align-items:center;background:none;border:0;color:var(--muted);cursor:pointer;padding:3px;flex:none}
+.chatit .x svg{width:14px;height:14px}
 .chatit .x:hover{color:var(--danger)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
-<header><button class='btn' id='chats' aria-label='Чаты'>☰</button><h1>Чат с ИИ</h1><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
-<aside id='side'><div class='side-head'><b>Чаты</b><button class='btn' id='side-new'>+ Новый</button></div><div id='chatlist'></div></aside>
+<header><button class='btn' id='chats' aria-label='Чаты'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg></button><h1>Чат с ИИ</h1><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
+<aside id='side'><div class='side-head'><b>Чаты</b><button class='btn' id='side-new'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Новый</button></div><input id='chat-q' type='text' placeholder='Поиск по чатам…'><div id='chatlist'></div></aside>
 <div id='scrim'></div>
 <main id='log'></main>
 <div id='bar'>
 <div id='chips'></div>
-<form id='form'><button type='button' class='round' id='attach' aria-label='Прикрепить'>📎</button><textarea id='input' rows='1' placeholder='Сообщение, фото или файл…'></textarea><button class='round' id='send' type='submit'>↑</button></form>
+<form id='form'><button type='button' class='round' id='attach' aria-label='Прикрепить'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='m21.4 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/></svg></button><textarea id='input' rows='1' placeholder='Сообщение, фото или файл…'></textarea><button class='round' id='send' type='submit' aria-label='Отправить'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M12 19V5m0 0-6 6m6-6 6 6'/></svg></button></form>
 </div>
 <input type='file' id='file' multiple hidden>
 <dialog id='dlg'>
@@ -119,11 +132,20 @@ const Q=String.fromCharCode(34);
 const REDIR=location.origin+'/';
 const MODELS=['claude-opus-5','claude-opus-4-8','claude-opus-4-7','claude-sonnet-5','claude-sonnet-4-6','claude-haiku-4-5','claude-fable-5'];
 const DEF={key:'',endpoint:'/api',model:'claude-sonnet-5',system:'',tools:true,mcp:'',oauth:{}};
+const IC={
+send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></svg>',
+stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
+gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.82-.33 1.7 1.7 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.51 1.7 1.7 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .33-1.82 1.7 1.7 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.51-1 1.7 1.7 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.82.33h.01a1.7 1.7 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.51h.01a1.7 1.7 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.33 1.82v.01a1.7 1.7 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>',
+file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>',
+x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>',
+copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>'
+};
 const BUILTIN=[
 {type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
 {type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}}
 ];
-let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null;
+let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false;
 function loadCfg(){try{return {...DEF,...JSON.parse(localStorage.getItem('chat-cfg')||'{}')}}catch{return {...DEF}}}
 function saveCfg(){try{localStorage.setItem('chat-cfg',JSON.stringify(cfg))}catch{}}
 function loadHist(){try{return JSON.parse(localStorage.getItem('chat2-hist')||'[]')}catch{return []}}
@@ -156,18 +178,26 @@ function decorate(el){el.querySelectorAll('pre').forEach(pre=>{const b=document.
 
 function renderAll(){
 const log=$('log');log.innerHTML='';
-if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки и ходить в MCP.<br>Старые диалоги — за кнопкой ☰ слева.</div>'.split(Q).join(String.fromCharCode(39));return}
+if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки и ходить в MCP.<br>Старые диалоги — в меню слева сверху.</div>';return}
 const res={};history.forEach(m=>{if(m.role==='tool')res[m.tool_call_id]=m.content});
 history.forEach(m=>{
 if(m.role==='user')addUser(m);
 else if(m.role==='assistant'){if(m.content)addAI(m.content);(m.tool_calls||[]).forEach(c=>addTool(c,res[c.id]))}
 });
+const lastA=[...history].reverse().find(m=>m.role==='assistant');
+const bubbles=log.querySelectorAll('.msg.ai');const last=bubbles[bubbles.length-1];
+if(lastA&&lastA.content&&last&&!busy){
+const bar=document.createElement('div');bar.className='acts';
+const rb=document.createElement('button');rb.innerHTML=IC.redo;rb.title='Сгенерировать заново';rb.onclick=regen;bar.appendChild(rb);
+const cb=document.createElement('button');cb.innerHTML=IC.copy;cb.title='Копировать ответ';cb.onclick=()=>{navigator.clipboard.writeText(lastA.content);cb.style.color='var(--accent)';setTimeout(()=>cb.style.color='',900)};bar.appendChild(cb);
+last.appendChild(bar);
+}
 scroll();
 }
 function addUser(m){
 const d=document.createElement('div');d.className='msg user';
 if(Array.isArray(m.content))m.content.forEach(p=>{if(p.type==='image_url'){const i=document.createElement('img');i.src=p.image_url.url;d.appendChild(i)}else if(!m._ui&&p.type==='text')d.appendChild(document.createTextNode(p.text))});
-(m._ui&&m._ui.files||[]).forEach(n=>{const s=document.createElement('span');s.className='tag';s.textContent='📄 '+n;d.appendChild(s)});
+(m._ui&&m._ui.files||[]).forEach(n=>{const s=document.createElement('span');s.className='tag';s.innerHTML=IC.file;s.appendChild(document.createTextNode(n));d.appendChild(s)});
 const t=m._ui?m._ui.text:(typeof m.content==='string'?m.content:'');
 if(t){const x=document.createElement('div');x.textContent=t;d.appendChild(x)}
 $('log').appendChild(d);
@@ -175,7 +205,7 @@ $('log').appendChild(d);
 function addAI(t){const d=document.createElement('div');d.className='msg ai';d.innerHTML=md(t);decorate(d);$('log').appendChild(d)}
 function addTool(c,r){
 const d=document.createElement('details');d.className='tool';
-const s=document.createElement('summary');s.textContent='⚙ '+c.function.name;d.appendChild(s);
+const s=document.createElement('summary');s.innerHTML=IC.gear;s.appendChild(document.createTextNode(c.function.name));d.appendChild(s);
 const p=document.createElement('pre');p.textContent=c.function.arguments+NL+NL+'→ '+(r===undefined?'выполняется…':String(r).slice(0,3000));d.appendChild(p);
 $('log').appendChild(d);
 }
@@ -183,11 +213,12 @@ $('log').appendChild(d);
 function closeSide(){$('side').classList.remove('open');$('scrim').classList.remove('open')}
 function renderChats(){
 const l=$('chatlist');if(!l)return;l.innerHTML='';
-chats.slice().sort((a,b)=>(b.updated||0)-(a.updated||0)).forEach(c=>{
+const q=(($('chat-q')&&$('chat-q').value)||'').toLowerCase();
+chats.slice().sort((a,b)=>(b.updated||0)-(a.updated||0)).filter(c=>!q||(c.title||'').toLowerCase().includes(q)).forEach(c=>{
 const d=document.createElement('div');d.className='chatit'+(c.id===cur?' cur':'');
 const t=document.createElement('span');t.className='t';t.textContent=c.title||'Чат';d.appendChild(t);
 const dt=document.createElement('span');dt.className='d';dt.textContent=c.updated?new Date(c.updated).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}):'';d.appendChild(dt);
-const x=document.createElement('button');x.className='x';x.textContent='×';x.title='Удалить';
+const x=document.createElement('button');x.className='x';x.innerHTML=IC.x;x.title='Удалить';
 x.onclick=e=>{e.stopPropagation();if(!confirm('Удалить «'+(c.title||'Чат')+'»?'))return;if(cur===c.id){if(busy&&ctrl)ctrl.abort();cur='';history=[];try{localStorage.removeItem('chat2-cur')}catch{}}chats=chats.filter(y=>y.id!==c.id);try{localStorage.setItem('chat2-chats',JSON.stringify(chats))}catch{}renderChats();renderAll()};
 d.appendChild(x);
 d.onclick=()=>openChat(c.id);
@@ -217,11 +248,22 @@ pending.forEach((p,i)=>{
 const d=document.createElement('div');d.className='chip';
 if(p.kind==='img'){const im=document.createElement('img');im.src=p.url;d.appendChild(im)}
 const n=document.createElement('span');n.textContent=p.name.slice(0,22);d.appendChild(n);
-const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{pending.splice(i,1);renderChips()};d.appendChild(x);
+const x=document.createElement('button');x.type='button';x.innerHTML=IC.x;x.onclick=()=>{pending.splice(i,1);renderChips()};d.appendChild(x);
 c.appendChild(d);
 });
 }
-function imgData(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f);const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.85))};im.onerror=()=>no(new Error('не удалось открыть картинку'));im.src=u})}
+function imgData(f){return new Promise((ok,no)=>{
+const u=URL.createObjectURL(f);const im=new Image();
+im.onload=()=>{
+const draw=(max,q)=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q)};
+let d=draw(1280,0.8);
+if(d.length>2600000)d=draw(1024,0.7);
+if(d.length>3800000){URL.revokeObjectURL(u);no(new Error('фото слишком большое даже после сжатия'));return}
+URL.revokeObjectURL(u);ok(d);
+};
+im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('не удалось открыть картинку'))};
+im.src=u;
+})}
 async function pdfText(f){
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let out='';
@@ -379,7 +421,7 @@ const body={model:cfg.model,messages:msgs,stream:true};
 const tl=cfg.tools?[...BUILTIN,...mcpTools.map(t=>t.def)]:[];if(tl.length)body.tools=tl;
 const res=await fetch(base()+'/chat/completions',{method:'POST',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)});
 if(!res.ok)throw new Error('HTTP '+res.status+': '+(await res.text()).slice(0,300));
-const live=document.createElement('div');live.className='msg ai';live.innerHTML='<span class="dots"><span></span><span></span><span></span></span>'.split(Q).join(String.fromCharCode(39));
+const live=document.createElement('div');live.className='msg ai';live.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
 $('log').appendChild(live);scroll();
 const rd=res.body.getReader(),dec=new TextDecoder();let buf='',content='',raf=0;const calls=[];
 try{
@@ -397,11 +439,25 @@ for(const tc of dl.tool_calls||[]){const c=calls[tc.index||0]||(calls[tc.index||
 }finally{live.remove()}
 return {content,calls:calls.filter(Boolean)};
 }
-function setBusy(b){busy=b;$('send').textContent=b?'■':'↑'}
+function setBusy(b){busy=b;$('send').innerHTML=b?IC.stop:IC.send}
+function stripImages(){
+for(let i=history.length-1;i>=0;i--){
+const m=history[i];
+if(m.role==='user'){
+if(Array.isArray(m.content)&&m.content.some(p=>p.type==='image_url')){
+const t=(m.content.find(p=>p.type==='text')||{text:''}).text;
+m.content=(t?t+NL:'')+'[фото не доставлено — сервер его отклонил]';
+renderAll();return true;
+}
+break;
+}
+}
+return false;
+}
 async function agent(){
 setBusy(true);ctrl=new AbortController();
-try{
-for(let step=0;step<8;step++){
+const loop=async()=>{
+for(let step=0;step<12;step++){
 const r=await turn(ctrl.signal);
 if(!r.content&&!r.calls.length)throw new Error('Пустой ответ от сервера');
 const m={role:'assistant',content:r.content||null};
@@ -411,8 +467,20 @@ if(!r.calls.length)break;
 for(let k=0;k<r.calls.length;k++){const c=r.calls[k];const out=ctrl.signal.aborted?'Отменено':await runTool(c);history.push({role:'tool',tool_call_id:m.tool_calls[k].id,content:out});renderAll()}
 if(ctrl.signal.aborted)break;
 }
-}catch(e){if(e.name!=='AbortError')toast(e.message,true)}
-finally{setBusy(false);saveHist();renderAll()}
+};
+try{await loop()}
+catch(e){
+if(e.name==='AbortError'){}
+else if(!imgRetry&&stripImages()){imgRetry=true;toast('Сервер не принял фото — отправляю без них',true);try{await loop()}catch(e2){if(e2.name!=='AbortError')toast(e2.message,true)}}
+else toast(e.message,true);
+}
+finally{setBusy(false);imgRetry=false;saveHist();renderAll()}
+}
+function regen(){
+if(busy)return;
+while(history.length&&history[history.length-1].role!=='user')history.pop();
+if(!history.length){renderAll();return}
+renderAll();agent();
 }
 async function send(){
 const inp=$('input');const text=inp.value.trim();
@@ -487,6 +555,7 @@ $('new').onclick=newChat;
 $('chats').onclick=()=>{renderChats();$('side').classList.add('open');$('scrim').classList.add('open')};
 $('scrim').onclick=closeSide;
 $('side-new').onclick=newChat;
+$('chat-q').addEventListener('input',renderChats);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSide()});
 $('attach').onclick=()=>$('file').click();
 $('file').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
