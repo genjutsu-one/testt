@@ -30,7 +30,7 @@ async def resolve(c, chat):
     except Exception:
         pass
     low = chat.lower()
-    async for d in c.iter_dialogs(limit=300):
+    async for d in c.iter_dialogs(limit=100):
         if d.id == key or (isinstance(key, str) and low in (d.name or '').lower()):
             return d.entity
     raise ValueError('chat not found: ' + chat)
@@ -111,14 +111,14 @@ async def login(b):
         await c.connect()
         try:
             if b.get('need_password') and b.get('password'):
-                await c.sign_in(password=b['password'])
+                await c.sign_in(phone=b['phone'], password=b['password'])
             else:
                 try:
                     await c.sign_in(phone=b['phone'], code=b['code'], phone_code_hash=b['phone_code_hash'])
                 except SessionPasswordNeededError:
                     if not b.get('password'):
                         return {'need_password': True, 'session': c.session.save()}
-                    await c.sign_in(password=b['password'])
+                    await c.sign_in(phone=b['phone'], password=b['password'])
             me = await c.get_me()
             return {'session': c.session.save(), 'me': (me.first_name or '') + ' @' + str(me.username)}
         finally:
