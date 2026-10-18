@@ -50,11 +50,11 @@ details.think{align-self:flex-start;max-width:min(760px,92%);font-size:13px;colo
 details.think summary{cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--accent)}
 details.think summary svg{width:14px;height:14px;flex:none}
 details.think .txt{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;margin-top:6px;color:var(--muted)}
-details.think.live{border-style:solid}
+details.think.live{border-style:solid;border-color:var(--accent)}
 details.sub{align-self:flex-start;max-width:min(760px,92%);font-size:13px;color:var(--muted);border:1px dashed var(--accent);border-radius:12px;padding:6px 12px;background:#b79cff0a}
 details.sub summary{cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--accent)}
 details.sub summary svg{width:14px;height:14px}
-details.sub pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:300px;overflow:auto;color:var(--text)}
+details.sub pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:320px;overflow:auto;color:var(--text)}
 .outfile{display:flex;align-items:center;gap:10px;background:#0b0a0f;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:8px;font-size:13px}
 .outfile svg{width:18px;height:18px;flex:none;color:var(--accent)}
 .outfile .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -64,6 +64,12 @@ details.sub pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word
 #bar{border-top:1px solid var(--line);background:rgba(14,13,18,.85);padding:10px 14px}
 #chips{display:flex;gap:6px;flex-wrap:wrap}
 #chips:not(:empty){margin-bottom:8px}
+#board{margin-bottom:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12.5px;display:none}
+#board.on{display:block}
+#board .it{display:flex;gap:8px;align-items:flex-start;padding:2px 0;color:var(--muted)}
+#board .it.done{color:var(--text);text-decoration:line-through;opacity:.6}
+#board .it .box{flex:none;width:14px;height:14px;border:1.5px solid var(--muted);border-radius:4px;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)}
+#board .it.done .box{border-color:var(--accent);background:var(--accent);color:#1a1230}
 .chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 6px 4px 8px;font-size:12.5px}
 .chip img{width:28px;height:28px;object-fit:cover;border-radius:6px}
 .chip button{display:flex;align-items:center;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px}
@@ -86,6 +92,8 @@ dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
 .dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
 .dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,60%,100%{opacity:.3}30%{opacity:1}}
+.ask-in{width:100%;margin-top:8px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--text);font:inherit;font-size:14px}
+.ask-in:focus{border-color:var(--accent)}
 #side{position:fixed;top:0;left:0;bottom:0;width:min(320px,86vw);background:var(--panel);border-right:1px solid var(--line);transform:translateX(-105%);transition:transform .2s;z-index:8;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
 #side.open{transform:none}
 #scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:7}
@@ -119,6 +127,7 @@ textarea{font-size:16px}
 <div id='scrim'></div>
 <main id='log'></main>
 <div id='bar'>
+<div id='board'></div>
 <div id='chips'></div>
 <form id='form'><button type='button' class='round' id='attach' aria-label='Прикрепить'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'><path d='m21.4 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48'/></svg></button><textarea id='input' rows='1' placeholder='Сообщение, фото или файл…'></textarea><button class='round' id='send' type='submit' aria-label='Отправить'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><path d='M12 19V5m0 0-6 6m6-6 6 6'/></svg></button></form>
 </div>
@@ -172,16 +181,21 @@ sub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.
 dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg>'
 };
 const BUILTIN=[
-{type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
+{type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit; fetch() is allowed). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
 {type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}},
+{type:'function',function:{name:'web_search',description:'Web search via DuckDuckGo. Returns top results as "title / url / snippet". Use to find fresh info, docs, releases.',parameters:{type:'object',properties:{query:{type:'string'}},required:['query']}}},
 {type:'function',function:{name:'remember',description:'Save a durable fact about the user or project to memory. Facts persist across chats. Call sparingly, only for things worth remembering long-term.',parameters:{type:'object',properties:{text:{type:'string'}},required:['text']}}},
 {type:'function',function:{name:'forget',description:'Remove a fact from memory by its exact text or a substring.',parameters:{type:'object',properties:{text:{type:'string'}},required:['text']}}},
 {type:'function',function:{name:'read_file',description:'Read a slice of an attached file stored in this chat. name is the filename from [Файл: name]. Returns chars offset..offset+limit (default 0..8000).',parameters:{type:'object',properties:{name:{type:'string'},offset:{type:'integer'},limit:{type:'integer'}},required:['name']}}},
+{type:'function',function:{name:'list_files',description:'List files attached to this chat: name and size in chars.',parameters:{type:'object',properties:{}}}},
+{type:'function',function:{name:'search_chats',description:'Search all saved chat histories for a text query. Returns matching "chat title — excerpt" lines.',parameters:{type:'object',properties:{query:{type:'string'}},required:['query']}}},
+{type:'function',function:{name:'todo',description:'Set or update the visible task plan for this chat. items: [{text:"...", done:false}]. Send the FULL list every time. Use for multi-step work so the user sees progress.',parameters:{type:'object',properties:{items:{type:'array',items:{type:'object',properties:{text:{type:'string'},done:{type:'boolean'}},required:['text']}}},required:['items']}}},
+{type:'function',function:{name:'ask_user',description:'Ask the user a question mid-task and wait for the typed reply. Use ONLY when truly blocked or a decision changes the outcome.',parameters:{type:'object',properties:{question:{type:'string'}},required:['question']}}},
 {type:'function',function:{name:'gh',description:'GitHub API: read/write files in my repos. action: list|read|write. repo like "owner/name". For write provide path, content, message, optional branch.',parameters:{type:'object',properties:{action:{type:'string'},repo:{type:'string'},path:{type:'string'},content:{type:'string'},message:{type:'string'},branch:{type:'string'}},required:['action','repo']}}},
-{type:'function',function:{name:'delegate',description:'Spawn a sub-agent (fresh context, same tools minus delegate) to solve a self-contained subtask, e.g. research, code draft, verification. Give it full context in task. Returns its final answer.',parameters:{type:'object',properties:{task:{type:'string'}},required:['task']}}},
-{type:'function',function:{name:'send_file',description:'Attach a file to my reply so the user can download it (code, report, etc).',parameters:{type:'object',properties:{name:{type:'string'},content:{type:'string'}},required:['name','content']}}}
+{type:'function',function:{name:'delegate',description:'Spawn a sub-agent (fresh context, same tools minus delegate/ask_user) to solve a self-contained subtask: research, code draft, verification. Give it FULL context in task — it cannot see this chat. Returns its final report.',parameters:{type:'object',properties:{task:{type:'string'}},required:['task']}}},
+{type:'function',function:{name:'send_file',description:'Attach a file to my reply so the user can download it (code, report, patch, etc).',parameters:{type:'object',properties:{name:{type:'string'},content:{type:'string'}},required:['name','content']}}}
 ];
-let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false,tempChat=false,thinkMode=false,agentMode=true,tickT=null,chatFiles={};
+let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false,tempChat=false,thinkMode=false,agentMode=true,tickT=null,chatFiles={},chatTodo=[];
 function loadCfg(){try{return {...DEF,...JSON.parse(localStorage.getItem('chat-cfg')||'{}')}}catch{return {...DEF}}}
 function saveCfg(){try{localStorage.setItem('chat-cfg',JSON.stringify(cfg))}catch{}}
 function loadHist(){try{return JSON.parse(localStorage.getItem('chat2-hist')||'[]')}catch{return []}}
@@ -192,7 +206,7 @@ function firstTitle(h){const u=(h||[]).find(m=>m.role==='user');if(!u)return '';
 (function(){try{
 cur=localStorage.getItem('chat2-cur')||'';
 if(!chats.length){const oh=loadHist();if(oh.length){chats=[{id:'c'+Date.now(),title:firstTitle(oh)||'Чат',created:Date.now(),updated:Date.now(),msgs:oh}];cur=chats[0].id;localStorage.setItem('chat2-chats',JSON.stringify(chats));localStorage.setItem('chat2-cur',cur);localStorage.removeItem('chat2-hist')}}
-const c=chats.find(x=>x.id===cur);if(c){history=c.msgs||[];chatFiles=c.files||{}}else cur='';
+const c=chats.find(x=>x.id===cur);if(c){history=c.msgs||[];chatFiles=c.files||{};chatTodo=c.todo||[]}else cur='';
 }catch{}})();
 function strip(m){return Array.isArray(m.content)?{...m,content:m.content.map(p=>p.type==='image_url'?{type:'text',text:'[фото]'}:p)}:m}
 function saveHist(){
@@ -201,7 +215,7 @@ try{
 if(history.length){
 let c=chats.find(x=>x.id===cur);
 if(!c){c={id:'c'+Date.now()+Math.random().toString(36).slice(2,6),title:'Новый чат',created:Date.now(),updated:0,msgs:[]};chats.unshift(c);cur=c.id}
-c.msgs=history.map(strip);c.updated=Date.now();c.files=chatFiles;
+c.msgs=history.map(strip);c.updated=Date.now();c.files=chatFiles;c.todo=chatTodo;
 if(c.title==='Новый чат')c.title=firstTitle(history)||c.title;
 }else if(cur){chats=chats.filter(x=>x.id!==cur);cur=''}
 localStorage.setItem('chat2-chats',JSON.stringify(chats));
@@ -215,15 +229,33 @@ function scroll(){$('log').scrollTop=$('log').scrollHeight}
 function md(t){try{return DOMPurify.sanitize(marked.parse(t,{breaks:true}))}catch{const d=document.createElement('div');d.textContent=t;return d.innerHTML}}
 function decorate(el){el.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='copy';b.textContent='копировать';b.onclick=()=>{const c=pre.querySelector('code');navigator.clipboard.writeText((c||pre).innerText);b.textContent='готово';setTimeout(()=>b.textContent='копировать',1200)};pre.appendChild(b)})}
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
-function splitThink(t){const i=t.indexOf('</think>');if(i<0)return{think:t.startsWith('<think>')?t.slice(7):'',text:t.startsWith('<think>')?'':t};return{think:t.slice(7,i),text:t.slice(i+8).trimStart()}}
+function splitThink(t){
+const i=t.indexOf('</think>');
+if(t.trimStart().startsWith('<think>')){
+const off=t.indexOf('<think>')+7;
+if(i<0)return{think:t.slice(off),text:''};
+return{think:t.slice(off,i),text:t.slice(i+8).trimStart()};
+}
+return{think:'',text:t};
+}
+function renderBoard(){
+const b=$('board');if(!b)return;
+if(!chatTodo.length){b.className='';b.innerHTML='';return}
+b.className='on';b.innerHTML='';
+chatTodo.forEach(it=>{
+const d=document.createElement('div');d.className='it'+(it.done?' done':'');
+d.innerHTML='<span class="box">'+(it.done?'✓':'')+'</span>';
+const t=document.createElement('span');t.textContent=it.text;d.appendChild(t);b.appendChild(d);
+});
+}
 function renderAll(){
 const log=$('log');log.innerHTML='';
-if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки, ходить в MCP,<br>коммитить в твой GitHub и звать помощника.</div>';return}
+if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, искать в сети, ходить в MCP,<br>коммитить в твой GitHub, вести план и звать помощника.</div>';return}
 const res={};history.forEach(m=>{if(m.role==='tool')res[m.tool_call_id]=m.content});
 history.forEach(m=>{
 if(m.role==='user')addUser(m);
 else if(m.role==='assistant'){
-if(m.content){const p=splitThink(m.content);if(p.think){const d=document.createElement('details');d.className='think';const s=document.createElement('summary');s.innerHTML=IC.brain+'<span>рассуждение</span>';d.appendChild(s);const t=document.createElement('div');t.className='txt';t.textContent=p.think;d.appendChild(t);log.appendChild(d)}if(p.text||!p.think)addAI(p.text||' ')}
+if(m.content){const p=splitThink(m.content);if(p.think){const d=document.createElement('details');d.className='think';const s=document.createElement('summary');s.innerHTML=IC.brain+'<span>'+(m._think?('Думал '+m._think+'с'):'рассуждение')+'</span>';d.appendChild(s);const t=document.createElement('div');t.className='txt';t.textContent=p.think;d.appendChild(t);log.appendChild(d)}if(p.text)addAI(p.text)}
 if(m._files)m._files.forEach(f=>addOutFile(f));
 (m.tool_calls||[]).forEach(c=>addTool(c,res[c.id]));
 }
@@ -268,11 +300,16 @@ const s=document.createElement('summary');s.innerHTML=isSub?IC.sub:IC.gear;s.app
 const p=document.createElement('pre');p.textContent=c.function.arguments+NL+NL+'→ '+(r===undefined?'выполняется…':String(r).slice(0,3000));d.appendChild(p);
 $('log').appendChild(d);
 }
-function addSub(task,res){
-const d=document.createElement('details');d.className='sub';
-const s=document.createElement('summary');s.innerHTML=IC.sub;s.appendChild(document.createTextNode('помощник: '+task.slice(0,80)));d.appendChild(s);
-const p=document.createElement('pre');p.textContent='ЗАДАЧА:'+NL+task+NL+NL+'ОТЧЁТ:'+NL+res;d.appendChild(p);
+function addSub(task){
+const d=document.createElement('details');d.className='sub';d.open=true;
+const s=document.createElement('summary');s.innerHTML=IC.sub;s.appendChild(document.createTextNode('помощник: '+task.slice(0,80)+' — работает…'));d.appendChild(s);
+const p=document.createElement('pre');p.textContent='ЗАДАЧА:'+NL+task+NL+NL+'Ход:'+NL;d.appendChild(p);
 $('log').appendChild(d);scroll();
+return{
+step:t=>{p.textContent+=t+NL;scroll()},
+done:res=>{s.innerHTML=IC.sub;s.appendChild(document.createTextNode('помощник: '+task.slice(0,80)+' — готов'));p.textContent+=NL+'ОТЧЁТ:'+NL+res;scroll()},
+fail:e=>{s.innerHTML=IC.sub;s.appendChild(document.createTextNode('помощник: '+task.slice(0,80)+' — ошибка'));p.textContent+=NL+'ОШИБКА: '+e;scroll()}
+};
 }
 
 function closeSide(){$('side').classList.remove('open');$('scrim').classList.remove('open')}
@@ -284,7 +321,7 @@ const d=document.createElement('div');d.className='chatit'+(c.id===cur?' cur':''
 const t=document.createElement('span');t.className='t';t.textContent=c.title||'Чат';d.appendChild(t);
 const dt=document.createElement('span');dt.className='d';dt.textContent=c.updated?new Date(c.updated).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}):'';d.appendChild(dt);
 const x=document.createElement('button');x.className='x';x.innerHTML=IC.x;x.title='Удалить';
-x.onclick=e=>{e.stopPropagation();if(!confirm('Удалить «'+(c.title||'Чат')+'»?'))return;if(cur===c.id){if(busy&&ctrl)ctrl.abort();cur='';history=[];chatFiles={};try{localStorage.removeItem('chat2-cur')}catch{}}chats=chats.filter(y=>y.id!==c.id);try{localStorage.setItem('chat2-chats',JSON.stringify(chats))}catch{}renderChats();renderAll()};
+x.onclick=e=>{e.stopPropagation();if(!confirm('Удалить «'+(c.title||'Чат')+'»?'))return;if(cur===c.id){if(busy&&ctrl)ctrl.abort();cur='';history=[];chatFiles={};chatTodo=[];renderBoard();try{localStorage.removeItem('chat2-cur')}catch{}}chats=chats.filter(y=>y.id!==c.id);try{localStorage.setItem('chat2-chats',JSON.stringify(chats))}catch{}renderChats();renderAll()};
 d.appendChild(x);
 d.onclick=()=>openChat(c.id);
 l.appendChild(d);
@@ -295,13 +332,14 @@ function openChat(id){
 if(id===cur){closeSide();return}
 if(busy&&ctrl)ctrl.abort();
 const c=chats.find(x=>x.id===id);if(!c)return;
-cur=id;history=c.msgs||[];chatFiles=c.files||{};tempChat=false;$('temp').classList.remove('on');
+cur=id;history=c.msgs||[];chatFiles=c.files||{};chatTodo=c.todo||[];renderBoard();
+tempChat=false;$('temp').classList.remove('on');
 try{localStorage.setItem('chat2-cur',cur)}catch{}
 closeSide();renderAll();renderChats();
 }
 function newChat(){
 if(busy&&ctrl)ctrl.abort();
-history=[];cur='';pending=[];chatFiles={};renderChips();
+history=[];cur='';pending=[];chatFiles={};chatTodo=[];renderChips();renderBoard();
 try{localStorage.removeItem('chat2-cur')}catch{}
 closeSide();renderAll();renderChats();
 $('input').focus();
@@ -362,6 +400,26 @@ const r=await px(url,'GET',{});let t=r.body;
 if((r.headers['content-type']||'').includes('html'))t=new DOMParser().parseFromString(t,'text/html').body.textContent;
 return 'HTTP '+r.status+NL+t.split(NL).map(x=>x.trim()).filter(Boolean).join(NL).slice(0,20000);
 }
+async function webSearch(q){
+const r=await px('https://html.duckduckgo.com/html/?q='+encodeURIComponent(q),'GET',{'User-Agent':'Mozilla/5.0'});
+const doc=new DOMParser().parseFromString(r.body,'text/html');
+const out=[];
+doc.querySelectorAll('.result').forEach(e=>{
+const a=e.querySelector('.result__a');const s=e.querySelector('.result__snippet');
+if(a){let u=a.getAttribute('href')||'';const m=u.match(/uddg=([^&]+)/);if(m)u=decodeURIComponent(m[1]);out.push({t:a.textContent.trim(),u,s:s?s.textContent.trim():''})}
+});
+return out.slice(0,10).map((x,i)=>(i+1)+'. '+x.t+NL+x.u+NL+x.s).join(NL+NL)||'ничего не нашлось (HTTP '+r.status+')';
+}
+function askUser(q){return new Promise(res=>{
+const d=document.createElement('div');d.className='msg ai';
+d.innerHTML='<div><b>Вопрос:</b> '+esc(q)+'</div>';
+const inp=document.createElement('input');inp.className='ask-in';inp.type='text';inp.placeholder='Твой ответ…';
+const b=document.createElement('button');b.className='btn';b.style.marginTop='8px';b.textContent='Ответить';
+b.onclick=()=>{const v=inp.value.trim()||'(пусто)';d.innerHTML='<div><b>Вопрос:</b> '+esc(q)+'</div><div style="margin-top:6px;color:var(--accent)">→ '+esc(v)+'</div>';res(v)};
+inp.onkeydown=e=>{if(e.key==='Enter')b.click()};
+d.appendChild(inp);d.appendChild(b);$('log').appendChild(d);scroll();inp.focus();
+if(ctrl)ctrl.signal.addEventListener('abort',()=>{d.innerHTML='<div><b>Вопрос:</b> '+esc(q)+'</div><div style="margin-top:6px;color:var(--muted)">→ отменено</div>';res('(пользователь остановил)')},{once:true});
+})}
 
 // ---------- OAuth ----------
 function b64u(buf){let s='';new Uint8Array(buf).forEach(b=>s+=String.fromCharCode(b));return btoa(s).split('+').join('-').split('/').join('_').split('=').join('')}
@@ -470,7 +528,7 @@ async function ghApi(a){
 if(!cfg.gh)return 'Ошибка: впиши GitHub token в настройках';
 const api='https://api.github.com';
 const h={Authorization:'Bearer '+cfg.gh,Accept:'application/vnd.github+json','Content-Type':'application/json'};
-const [o,r0]=a.repo.split('/');
+const [o,r0]=(a.repo||'').split('/');
 try{
 if(a.action==='list'){const r=await px(api+'/repos/'+o+'/'+r0+'/contents/'+(a.path||''),'GET',h);const j=JSON.parse(r.body);return Array.isArray(j)?j.map(x=>x.type+' '+x.path).join(NL).slice(0,15000):JSON.stringify(j)}
 if(a.action==='read'){const r=await px(api+'/repos/'+o+'/'+r0+'/contents/'+a.path+(a.branch?'?ref='+a.branch:''),'GET',h);const j=JSON.parse(r.body);if(j.content)return decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))).slice(0,40000);return JSON.stringify(j).slice(0,8000)}
@@ -484,36 +542,55 @@ return r.status<300?'Закоммичено: '+(j.commit&&j.commit.html_url||a.p
 return 'Неизвестный action (list/read/write)';
 }catch(e){return 'Ошибка gh: '+e.message}
 }
+async function runSubTool(name,a){
+if(name==='run_js')return await runJS(a.code||'');
+if(name==='fetch_url')return await fetchUrl(a.url);
+if(name==='web_search')return await webSearch(a.query||'');
+if(name==='remember'){const m=mem();if(!m.includes(a.text)){m.push(a.text);setMem(m)}return 'запомнил'}
+if(name==='forget'){setMem(mem().filter(x=>!x.includes(a.text)));return 'забыл'}
+if(name==='read_file'){const t=chatFiles[a.name];return t===undefined?'нет такого файла':t.slice(a.offset||0,(a.offset||0)+(a.limit||8000))}
+if(name==='list_files')return Object.keys(chatFiles).map(n=>n+' ('+chatFiles[n].length+' chars)').join(NL)||'файлов нет';
+if(name==='search_chats')return searchChats(a.query||'');
+if(name==='gh')return await ghApi(a);
+if(name==='todo'||name==='ask_user'||name==='send_file'||name==='delegate')return 'недоступно субагенту';
+const t=mcpTools.find(x=>x.def.function.name===name);
+if(t){const r=await rpc(t.s,'tools/call',{name:t.name,arguments:a});return((r.content||[]).map(x=>x.text||'').join(NL)||JSON.stringify(r)).slice(0,15000)}
+return 'Неизвестный инструмент';
+}
+function searchChats(q){
+q=(q||'').toLowerCase();const hits=[];
+chats.forEach(ch=>{(ch.msgs||[]).forEach(m=>{
+const t=typeof m.content==='string'?m.content:(m._ui&&m._ui.text)||'';
+if(t&&t.toLowerCase().includes(q))hits.push((ch.title||'Чат')+' — '+t.slice(0,150).replace(/\n/g,' '));
+})});
+return hits.slice(0,15).join(NL)||'ничего не нашлось';
+}
 async function delegate(task){
-const subHist=[{role:'user',content:task}];
-const tools=cfg.tools?[...BUILTIN.filter(t=>t.function.name!=='delegate'),...mcpTools.map(t=>t.def)]:[];
-let out='',steps=0;
-const maxSub=6;
-for(let i=0;i<maxSub;i++){
-const msgs=[];if(cfg.system)msgs.push({role:'system',content:cfg.system});
-subHist.forEach(m=>msgs.push(m));
-const body={model:cfg.model,messages:msgs,stream:false,tools:tools};
+const ui=addSub(task);
+const subHist=[{role:'system',content:'Ты — субагент-помощник внутри чата. Выполни задачу самостоятельно, используй инструменты при необходимости. В ФИНАЛЬНОМ ответе (без tool_calls) верни краткий отчёт с результатом.'},{role:'user',content:task}];
+const tools=cfg.tools?[...BUILTIN.filter(t=>!['delegate','ask_user','send_file','todo'].includes(t.function.name)),...mcpTools.map(t=>t.def)]:[];
+let lastText='',steps=0;
+try{
+for(let i=0;i<6;i++){
+const body={model:cfg.model,messages:subHist,stream:false};if(tools.length)body.tools=tools;
 const r=await fetch(base()+'/chat/completions',{method:'POST',signal:ctrl?ctrl.signal:undefined,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)});
-if(!r.ok)return 'Ошибка субагента: HTTP '+r.status;
-const j=await r.json();const msg=j.choices&&j.choices[0]&&j.choices[0].message;if(!msg)return 'Пустой ответ субагента';
+if(!r.ok){ui.fail('HTTP '+r.status);return 'Ошибка субагента: HTTP '+r.status}
+const j=await r.json();const msg=j.choices&&j.choices[0]&&j.choices[0].message;if(!msg){ui.fail('пустой ответ');return 'Пустой ответ субагента'}
 subHist.push({role:'assistant',content:msg.content,tool_calls:msg.tool_calls});
 steps++;
-if(msg.content&&!msg.tool_calls){out=msg.content;break}
-for(const tc of msg.tool_calls||[]){let a={};try{a=JSON.parse(tc.function.arguments||'{}')}catch{continue}
-let res='?';
-if(tc.function.name==='run_js')res=await runJS(a.code||'');
-else if(tc.function.name==='fetch_url')res=await fetchUrl(a.url);
-else if(tc.function.name==='remember'){const m=mem();if(!m.includes(a.text)){m.push(a.text);setMem(m)}res='запомнил'}
-else if(tc.function.name==='forget'){setMem(mem().filter(x=>!x.includes(a.text)));res='забыл'}
-else if(tc.function.name==='read_file'){const t=chatFiles[a.name];res=t===undefined?'нет такого файла':t.slice(a.offset||0,(a.offset||0)+(a.limit||8000))}
-else if(tc.function.name==='gh')res=await ghApi(a);
-else if(tc.function.name==='send_file')res='send_file недоступен субагенту';
-else{const t=mcpTools.find(x=>x.def.function.name===tc.function.name);res=t?await rpc(t.s,'tools/call',{name:t.name,arguments:a}).then(r=>((r.content||[]).map(x=>x.text||'').join(NL)||JSON.stringify(r)).slice(0,15000)):'?'}
+if(msg.content)lastText=msg.content;
+if(!(msg.tool_calls&&msg.tool_calls.length)){break}
+for(const tc of msg.tool_calls){
+let a={};try{a=JSON.parse(tc.function.arguments||'{}')}catch{continue}
+ui.step('▶ '+tc.function.name+' '+JSON.stringify(a).slice(0,200));
+const res=await runSubTool(tc.function.name,a);
+ui.step('◀ '+String(res).slice(0,300).replace(/\n/g,' ↵ '));
 subHist.push({role:'tool',tool_call_id:tc.id,content:String(res)});
 }
 }
-if(!out)out='(субагент закончил без текстового ответа, шагов: '+steps+')';
-addSub(task,out);
+}catch(e){ui.fail(e.message);return 'Ошибка субагента: '+e.message}
+const out=lastText||'(субагент не дал текстового ответа, шагов: '+steps+')';
+ui.done(out);
 return out;
 }
 async function runTool(c){
@@ -521,9 +598,14 @@ try{
 let a={};try{a=JSON.parse(c.args||'{}')}catch{return 'Ошибка: неверные аргументы'}
 if(c.name==='run_js')return await runJS(a.code||'');
 if(c.name==='fetch_url')return await fetchUrl(a.url);
+if(c.name==='web_search')return await webSearch(a.query||'');
 if(c.name==='remember'){const m=mem();if(!m.includes(a.text)){m.push(a.text);setMem(m)}return 'запомнил: '+a.text}
 if(c.name==='forget'){const b=mem().length;setMem(mem().filter(x=>!x.includes(a.text)));return 'удалено '+(b-mem().length)+' фактов'}
 if(c.name==='read_file'){const t=chatFiles[a.name];if(t===undefined)return 'Нет такого файла. Есть: '+Object.keys(chatFiles).join(', ');const o=a.offset||0,l=a.limit||8000;return 'chars '+o+'..'+(o+l)+' of '+t.length+NL+t.slice(o,o+l)}
+if(c.name==='list_files')return Object.keys(chatFiles).map(n=>n+' ('+chatFiles[n].length+' chars)').join(NL)||'файлов нет';
+if(c.name==='search_chats')return searchChats(a.query||'');
+if(c.name==='todo'){chatTodo=(a.items||[]).map(x=>({text:String(x.text||''),done:!!x.done}));renderBoard();return 'План обновлён: '+chatTodo.map(x=>(x.done?'[x] ':'[ ] ')+x.text).join(NL)}
+if(c.name==='ask_user')return await askUser(a.question||'?');
 if(c.name==='gh')return await ghApi(a);
 if(c.name==='delegate'){if(!agentMode)return 'Агентский режим выключен (кнопка в шапке)';return await delegate(a.task||'')}
 if(c.name==='send_file'){
@@ -549,22 +631,23 @@ return s;
 }
 async function turn(signal){
 const msgs=[];const sp=sysPrompt();if(sp)msgs.push({role:'system',content:sp});
-history.forEach(({_ui,_files,...m})=>msgs.push(m));
+history.forEach(({_ui,_files,_think,...m})=>msgs.push(m));
 const body={model:cfg.model,messages:msgs,stream:true};
 const tl=cfg.tools?[...BUILTIN,...mcpTools.map(t=>t.def)]:[];if(tl.length)body.tools=tl;
-let res=null,err=null;
-for(let a=0;a<2&&!res;a++){
-try{res=await fetch(base()+'/chat/completions',{method:'POST',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)})}
-catch(e){err=e;await new Promise(r=>setTimeout(r,800))}
-}
-if(!res)throw err;
-if(!res.ok)throw new Error('HTTP '+res.status+': '+(await res.text()).slice(0,300));
 const live=document.createElement('div');live.className='msg ai';live.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
-const thinkEl=document.createElement('details');thinkEl.className='think live';thinkEl.style.display='none';
+const thinkEl=document.createElement('details');thinkEl.className='think live';thinkEl.style.display='none';thinkEl.open=true;
 const thSum=document.createElement('summary');thSum.innerHTML=IC.brain+'<span>думаю…</span>';thinkEl.appendChild(thSum);
 const thTxt=document.createElement('div');thTxt.className='txt';thinkEl.appendChild(thTxt);
 $('log').appendChild(thinkEl);$('log').appendChild(live);scroll();
+let res=null,err=null;
+for(let a=0;a<2&&!res;a++){
+try{res=await fetch(base()+'/chat/completions',{method:'POST',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)})}
+catch(e){err=e;if(a<1)await new Promise(r=>setTimeout(r,800))}
+}
+if(!res){thinkEl.remove();live.remove();throw err}
+if(!res.ok){const t=await res.text();thinkEl.remove();live.remove();throw new Error('HTTP '+res.status+': '+t.slice(0,300))}
 const rd=res.body.getReader(),dec=new TextDecoder();let buf='',content='',raf=0;const calls=[];
+let thinkT0=0,thinkSec=0;
 try{
 while(true){
 const {done,value}=await rd.read();if(done)break;
@@ -575,14 +658,21 @@ let j;try{j=JSON.parse(d)}catch{continue}
 const dl=j.choices&&j.choices[0]&&j.choices[0].delta;if(!dl)continue;
 if(dl.content){content+=dl.content;if(!raf)raf=requestAnimationFrame(()=>{raf=0;
 const p=splitThink(content);
-if(content.startsWith('<think>')){thinkEl.style.display='';thTxt.textContent=p.think;live.innerHTML=md(p.text||'')}
-else live.innerHTML=md(content);
+if(p.think||content.trimStart().startsWith('<think>')){
+if(!thinkT0)thinkT0=Date.now();
+thinkEl.style.display='';thTxt.textContent=p.think;
+if(content.includes('</think>')){if(!thinkSec)thinkSec=Math.round((Date.now()-thinkT0)/1000);thinkEl.open=false;thinkEl.classList.remove('live');thSum.innerHTML=IC.brain+'<span>Думал '+thinkSec+'с</span>'}
+live.innerHTML=md(p.text||'');
+}else live.innerHTML=md(content);
 scroll()})}
 for(const tc of dl.tool_calls||[]){const c=calls[tc.index||0]||(calls[tc.index||0]={id:'',name:'',args:''});if(tc.id)c.id=tc.id;if(tc.function){if(tc.function.name)c.name+=tc.function.name;if(tc.function.arguments)c.args+=tc.function.arguments}}
 }
 }
-}finally{thinkEl.classList.remove('live');live.remove()}
-return {content,calls:calls.filter(Boolean)};
+}finally{
+if(thinkEl.style.display!=='none'&&!thinkSec){thinkSec=thinkT0?Math.round((Date.now()-thinkT0)/1000):0;thinkEl.open=false;thinkEl.classList.remove('live');if(thinkSec)thSum.innerHTML=IC.brain+'<span>Думал '+thinkSec+'с</span>'}
+thinkEl.classList.remove('live');live.remove();
+}
+return {content,calls:calls.filter(Boolean),thinkSec};
 }
 function setBusy(b){
 busy=b;$('send').innerHTML=b?IC.stop:IC.send;
@@ -611,6 +701,7 @@ for(let step=0;step<14;step++){
 const r=await turn(ctrl.signal);
 if(!r.content&&!r.calls.length)throw new Error('Пустой ответ от сервера');
 const m={role:'assistant',content:r.content||null};
+if(r.thinkSec)m._think=r.thinkSec;
 if(r.calls.length)m.tool_calls=r.calls.map(c=>({id:c.id||('call_'+step),type:'function',function:{name:c.name,arguments:c.args||'{}'}}));
 history.push(m);renderAll();
 if(!r.calls.length)break;
@@ -624,7 +715,7 @@ if(e.name==='AbortError'){}
 else if(!imgRetry&&stripImages()){imgRetry=true;toast('Сервер не принял фото — отправляю без них',true);try{await loop()}catch(e2){if(e2.name!=='AbortError')toast(e2.message,true)}}
 else toast(e.message,true);
 }
-finally{setBusy(false);imgRetry=false;saveHist();renderAll()}
+finally{setBusy(false);imgRetry=false;saveHist();renderAll();try{navigator.vibrate&&(document.hidden?navigator.vibrate([90,50,90]):navigator.vibrate(40))}catch{}}
 }
 function regen(){
 if(busy)return;
@@ -712,7 +803,7 @@ $('models').innerHTML=MODELS.map(m=>'<option value='+m+'>').join('');
 $('new').onclick=newChat;
 $('temp').onclick=()=>{
 if(tempChat){tempChat=false;cur='';try{localStorage.removeItem('chat2-cur')}catch{}}
-else{tempChat=true;history=[];cur='';chatFiles={};try{localStorage.removeItem('chat2-cur')}catch{}}
+else{tempChat=true;history=[];cur='';chatFiles={};chatTodo=[];renderBoard();try{localStorage.removeItem('chat2-cur')}catch{}}
 $('temp').classList.toggle('on',tempChat);
 $('tick').textContent=tempChat?'временный чат — не сохраняется':'';
 renderAll();renderChats();
@@ -752,7 +843,7 @@ $('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!matc
 const q=new URLSearchParams(location.search);
 if(q.get('code')&&q.get('state'))await finishOauth(q);
 else if(q.get('error')){toast('OAuth: '+q.get('error'),true);history_clean()}
-renderAll();renderChats();
+renderAll();renderChats();renderBoard();
 const c=chats.find(x=>x.id===cur);if(c)$('tick').textContent=c.title||'';
 if(!cfg.key)setTimeout(openSet,300);
 if(cfg.mcp)connectMcp();
