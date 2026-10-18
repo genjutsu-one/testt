@@ -59,11 +59,26 @@ dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
 .dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
 .dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,60%,100%{opacity:.3}30%{opacity:1}}
+#side{position:fixed;top:0;left:0;bottom:0;width:min(320px,86vw);background:var(--panel);border-right:1px solid var(--line);transform:translateX(-105%);transition:transform .2s;z-index:8;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
+#side.open{transform:none}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:7}
+#scrim.open{opacity:1;pointer-events:auto}
+.side-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);font-size:14px}
+#chatlist{flex:1;overflow-y:auto;padding:8px}
+.chatit{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;cursor:pointer;border:1px solid transparent}
+.chatit:hover{border-color:var(--line)}
+.chatit.cur{border-color:var(--accent);background:#b79cff14}
+.chatit .t{flex:1;min-width:0;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chatit .d{font-size:11px;color:var(--muted);flex:none}
+.chatit .x{background:none;border:0;color:var(--muted);font-size:15px;cursor:pointer;padding:2px 5px;flex:none}
+.chatit .x:hover{color:var(--danger)}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
-<header><h1>Чат с ИИ</h1><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
+<header><button class='btn' id='chats' aria-label='Чаты'>☰</button><h1>Чат с ИИ</h1><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
+<aside id='side'><div class='side-head'><b>Чаты</b><button class='btn' id='side-new'>+ Новый</button></div><div id='chatlist'></div></aside>
+<div id='scrim'></div>
 <main id='log'></main>
 <div id='bar'>
 <div id='chips'></div>
@@ -108,12 +123,31 @@ const BUILTIN=[
 {type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
 {type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}}
 ];
-let cfg=loadCfg(),history=loadHist(),pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null;
+let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null;
 function loadCfg(){try{return {...DEF,...JSON.parse(localStorage.getItem('chat-cfg')||'{}')}}catch{return {...DEF}}}
 function saveCfg(){try{localStorage.setItem('chat-cfg',JSON.stringify(cfg))}catch{}}
 function loadHist(){try{return JSON.parse(localStorage.getItem('chat2-hist')||'[]')}catch{return []}}
+function loadChats(){try{return JSON.parse(localStorage.getItem('chat2-chats')||'[]')}catch{return []}}
+function firstTitle(h){const u=(h||[]).find(m=>m.role==='user');if(!u)return '';const t=u._ui?u._ui.text:(typeof u.content==='string'?u.content:(Array.isArray(u.content)?((u.content.find(p=>p.type==='text')||{}).text||''):''));return (t||'').trim().slice(0,42)}
+(function(){try{
+cur=localStorage.getItem('chat2-cur')||'';
+if(!chats.length){const oh=loadHist();if(oh.length){chats=[{id:'c'+Date.now(),title:firstTitle(oh)||'Чат',created:Date.now(),updated:Date.now(),msgs:oh}];cur=chats[0].id;localStorage.setItem('chat2-chats',JSON.stringify(chats));localStorage.setItem('chat2-cur',cur);localStorage.removeItem('chat2-hist')}}
+const c=chats.find(x=>x.id===cur);if(c)history=c.msgs||[];else cur='';
+}catch{}})();
 function strip(m){return Array.isArray(m.content)?{...m,content:m.content.map(p=>p.type==='image_url'?{type:'text',text:'[фото]'}:p)}:m}
-function saveHist(){try{localStorage.setItem('chat2-hist',JSON.stringify(history.map(strip)))}catch{}}
+function saveHist(){
+try{
+if(history.length){
+let c=chats.find(x=>x.id===cur);
+if(!c){c={id:'c'+Date.now()+Math.random().toString(36).slice(2,6),title:'Новый чат',created:Date.now(),updated:0,msgs:[]};chats.unshift(c);cur=c.id}
+c.msgs=history.map(strip);c.updated=Date.now();
+if(c.title==='Новый чат')c.title=firstTitle(history)||c.title;
+}else if(cur){chats=chats.filter(x=>x.id!==cur);cur=''}
+localStorage.setItem('chat2-chats',JSON.stringify(chats));
+if(cur)localStorage.setItem('chat2-cur',cur);else localStorage.removeItem('chat2-cur');
+renderChats();
+}catch{}
+}
 function base(){let s=(cfg.endpoint||'/api').trim();while(s.endsWith('/'))s=s.slice(0,-1);return s}
 function toast(t,err){const d=document.createElement('div');d.className='toast'+(err?' err':'');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),5000)}
 function scroll(){$('log').scrollTop=$('log').scrollHeight}
@@ -122,7 +156,7 @@ function decorate(el){el.querySelectorAll('pre').forEach(pre=>{const b=document.
 
 function renderAll(){
 const log=$('log');log.innerHTML='';
-if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки и ходить в MCP.</div>'.split(Q).join(String.fromCharCode(39));return}
+if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки и ходить в MCP.<br>Старые диалоги — за кнопкой ☰ слева.</div>'.split(Q).join(String.fromCharCode(39));return}
 const res={};history.forEach(m=>{if(m.role==='tool')res[m.tool_call_id]=m.content});
 history.forEach(m=>{
 if(m.role==='user')addUser(m);
@@ -144,6 +178,37 @@ const d=document.createElement('details');d.className='tool';
 const s=document.createElement('summary');s.textContent='⚙ '+c.function.name;d.appendChild(s);
 const p=document.createElement('pre');p.textContent=c.function.arguments+NL+NL+'→ '+(r===undefined?'выполняется…':String(r).slice(0,3000));d.appendChild(p);
 $('log').appendChild(d);
+}
+
+function closeSide(){$('side').classList.remove('open');$('scrim').classList.remove('open')}
+function renderChats(){
+const l=$('chatlist');if(!l)return;l.innerHTML='';
+chats.slice().sort((a,b)=>(b.updated||0)-(a.updated||0)).forEach(c=>{
+const d=document.createElement('div');d.className='chatit'+(c.id===cur?' cur':'');
+const t=document.createElement('span');t.className='t';t.textContent=c.title||'Чат';d.appendChild(t);
+const dt=document.createElement('span');dt.className='d';dt.textContent=c.updated?new Date(c.updated).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}):'';d.appendChild(dt);
+const x=document.createElement('button');x.className='x';x.textContent='×';x.title='Удалить';
+x.onclick=e=>{e.stopPropagation();if(!confirm('Удалить «'+(c.title||'Чат')+'»?'))return;if(cur===c.id){if(busy&&ctrl)ctrl.abort();cur='';history=[];try{localStorage.removeItem('chat2-cur')}catch{}}chats=chats.filter(y=>y.id!==c.id);try{localStorage.setItem('chat2-chats',JSON.stringify(chats))}catch{}renderChats();renderAll()};
+d.appendChild(x);
+d.onclick=()=>openChat(c.id);
+l.appendChild(d);
+});
+if(!chats.length){const e=document.createElement('div');e.className='hint';e.style.padding='10px';e.textContent='Пока пусто — начни новый чат.';l.appendChild(e)}
+}
+function openChat(id){
+if(id===cur){closeSide();return}
+if(busy&&ctrl)ctrl.abort();
+const c=chats.find(x=>x.id===id);if(!c)return;
+cur=id;history=c.msgs||[];
+try{localStorage.setItem('chat2-cur',cur)}catch{}
+closeSide();renderAll();renderChats();
+}
+function newChat(){
+if(busy&&ctrl)ctrl.abort();
+history=[];cur='';pending=[];renderChips();
+try{localStorage.removeItem('chat2-cur')}catch{}
+closeSide();renderAll();renderChats();
+$('input').focus();
 }
 
 function renderChips(){
@@ -418,7 +483,11 @@ await connectMcp();
 };
 
 $('models').innerHTML=MODELS.map(m=>'<option value='+m+'>').join('');
-$('new').onclick=()=>{if(busy&&ctrl)ctrl.abort();history=[];saveHist();renderAll()};
+$('new').onclick=newChat;
+$('chats').onclick=()=>{renderChats();$('side').classList.add('open');$('scrim').classList.add('open')};
+$('scrim').onclick=closeSide;
+$('side-new').onclick=newChat;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSide()});
 $('attach').onclick=()=>$('file').click();
 $('file').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
 document.addEventListener('paste',e=>{const fs=[...(e.clipboardData?e.clipboardData.files:[])];if(fs.length){e.preventDefault();addFiles(fs)}});
@@ -433,7 +502,7 @@ $('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!matc
 const q=new URLSearchParams(location.search);
 if(q.get('code')&&q.get('state'))await finishOauth(q);
 else if(q.get('error')){toast('OAuth: '+q.get('error'),true);history_clean()}
-renderAll();
+renderAll();renderChats();
 if(!cfg.key)setTimeout(openSet,300);
 if(cfg.mcp)connectMcp();
 })();
