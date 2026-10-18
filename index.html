@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang='ru'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
+<title>Чат</title>
+<script src='https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'></script>
+<style>
+:root{--bg:#0e0d12;--panel:#17151d;--line:#2a2733;--text:#ece9f2;--muted:#8b869b;--me:#3b2a5c;--ai:#1a1822;--accent:#b79cff;--danger:#ff7a8a;--mono:ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:radial-gradient(900px 500px at 80% -10%,#251a40,transparent 60%),var(--bg);color:var(--text);font:15px/1.55 system-ui,'Segoe UI',Arial,sans-serif;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+header{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(14,13,18,.85);backdrop-filter:blur(10px)}
+header h1{font-size:16px;font-weight:600;flex:1}
+.btn{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#log{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:min(760px,92%);padding:10px 14px;border-radius:16px;border:1px solid var(--line);overflow-wrap:anywhere}
+.user{align-self:flex-end;background:var(--me);border-color:#4d3a75;border-bottom-right-radius:4px;white-space:pre-wrap}
+.ai{align-self:flex-start;background:var(--ai);border-bottom-left-radius:4px}
+.ai>*+*{margin-top:8px}
+.ai ul,.ai ol{padding-left:20px}
+.ai a{color:var(--accent)}
+.ai table{border-collapse:collapse;display:block;overflow-x:auto}
+.ai td,.ai th{border:1px solid var(--line);padding:4px 8px}
+.ai code{font-family:var(--mono);font-size:13px;background:#0b0a0f;padding:1px 5px;border-radius:5px}
+.ai pre{position:relative;background:#0b0a0f;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+.ai pre code{padding:0;background:none}
+.copy{position:absolute;top:6px;right:6px;font-size:11px;padding:3px 8px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.user img{display:block;max-width:100%;max-height:260px;border-radius:10px;margin-bottom:6px}
+.tag{display:inline-block;font-size:12px;background:#0b0a0f66;border:1px solid #ffffff22;border-radius:8px;padding:1px 8px;margin:0 4px 4px 0}
+details.tool{align-self:flex-start;max-width:min(760px,92%);font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:12px;padding:6px 12px}
+details.tool summary{cursor:pointer}
+details.tool pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:240px;overflow:auto;color:var(--text)}
+.empty{margin:auto;text-align:center;color:var(--muted);line-height:1.7;padding:0 20px}
+#bar{border-top:1px solid var(--line);background:rgba(14,13,18,.85);padding:10px 14px}
+#chips{display:flex;gap:6px;flex-wrap:wrap}
+#chips:not(:empty){margin-bottom:8px}
+.chip{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px 6px 4px 8px;font-size:12.5px}
+.chip img{width:28px;height:28px;object-fit:cover;border-radius:6px}
+.chip button{background:none;border:0;color:var(--muted);font-size:16px;cursor:pointer}
+form{display:flex;gap:8px;align-items:flex-end}
+textarea{flex:1;resize:none;max-height:160px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:11px 14px;font:inherit;line-height:1.4}
+.round{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;font-size:18px;flex:none}
+#send{background:var(--accent);color:#1a1230;border:0;font-weight:700}
+dialog{margin:auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;padding:20px;width:min(460px,94vw);max-height:92vh;overflow:auto}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+dialog h2{font-size:16px;margin-bottom:6px}
+label{display:block;font-size:12.5px;color:var(--muted);margin:12px 0 5px}
+dialog input[type=text],dialog input[type=password],dialog textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
+dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;margin-top:18px;justify-content:flex-end}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#2b2236;border:1px solid var(--accent);padding:9px 14px;border-radius:12px;font-size:13px;max-width:90vw;z-index:9}
+.toast.err{border-color:var(--danger);color:var(--danger)}
+.dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--muted);animation:b 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.3}30%{opacity:1}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header><h1>Чат с ИИ</h1><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
+<main id='log'></main>
+<div id='bar'>
+<div id='chips'></div>
+<form id='form'><button type='button' class='round' id='attach' aria-label='Прикрепить'>📎</button><textarea id='input' rows='1' placeholder='Сообщение, фото или файл…'></textarea><button class='round' id='send' type='submit'>↑</button></form>
+</div>
+<input type='file' id='file' multiple hidden>
+<dialog id='dlg'>
+<h2>Настройки</h2>
+<label for='key'>API ключ</label><input id='key' type='password' autocomplete='off' spellcheck='false' placeholder='sk-...'>
+<label for='endpoint'>Endpoint</label><input id='endpoint' type='text' spellcheck='false'>
+<label for='model'>Модель</label><input id='model' type='text' list='models' spellcheck='false'><datalist id='models'></datalist>
+<label for='system'>Системный промпт</label><textarea id='system' placeholder='Например: отвечай коротко'></textarea>
+<label style='display:flex;gap:8px;align-items:center;color:var(--text)'><input type='checkbox' id='tools'> Инструменты (код, ссылки, MCP)</label>
+<label for='mcp'>MCP серверы (по одному в строке: url или url|токен)</label><textarea id='mcp' spellcheck='false' placeholder='https://mcp.vercel.com'></textarea>
+<label>Вход через OAuth (для серверов без токена)</label>
+<input id='ourl' type='text' placeholder='URL MCP сервера' spellcheck='false'>
+<input id='ocid' type='text' placeholder='Client ID (нужен для Google, у Vercel не нужен)' spellcheck='false' style='margin-top:6px'>
+<input id='osec' type='password' placeholder='Client Secret (для Google)' autocomplete='off' style='margin-top:6px'>
+<input id='oscope' type='text' placeholder='scope (необязательно)' spellcheck='false' style='margin-top:6px'>
+<button class='btn' id='ologin' type='button' style='margin-top:8px'>Войти через OAuth</button>
+<p class='hint' id='redir'></p>
+<label>Telegram (вход по номеру через Telethon)</label>
+<input id='tgid' type='text' inputmode='numeric' placeholder='api_id (my.telegram.org)' spellcheck='false'>
+<input id='tghash' type='password' placeholder='api_hash' autocomplete='off' style='margin-top:6px'>
+<input id='tgphone' type='text' placeholder='+79991234567' spellcheck='false' style='margin-top:6px'>
+<button class='btn' id='tgcode' type='button' style='margin-top:8px'>Получить код</button>
+<input id='tgc' type='text' inputmode='numeric' placeholder='код из Telegram' autocomplete='off' style='margin-top:8px'>
+<input id='tgpw' type='password' placeholder='пароль 2FA (если включён)' autocomplete='off' style='margin-top:6px'>
+<button class='btn' id='tgin' type='button' style='margin-top:8px'>Войти в Telegram</button>
+<p class='hint' id='tgst'>Сессия хранится только в твоём браузере. Это полный доступ к аккаунту: отозвать её можно в Telegram → Устройства.</p>
+<p class='hint'>Если модель ругается на tools, выключи инструменты. Ключи и токены хранятся только в твоём браузере.</p>
+<div class='row'><button class='btn' id='cancel' type='button'>Отмена</button><button class='btn' id='save' type='button' style='border-color:var(--accent)'>Сохранить</button></div>
+</dialog>
+<script>
+const $=id=>document.getElementById(id);
+const NL=String.fromCharCode(10);
+const Q=String.fromCharCode(34);
+const REDIR=location.origin+'/';
+const MODELS=['claude-opus-5','claude-opus-4-8','claude-opus-4-7','claude-sonnet-5','claude-sonnet-4-6','claude-haiku-4-5','claude-fable-5'];
+const DEF={key:'',endpoint:'/api',model:'claude-sonnet-5',system:'',tools:true,mcp:'',oauth:{}};
+const BUILTIN=[
+{type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
+{type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}}
+];
+let cfg=loadCfg(),history=loadHist(),pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null;
+function loadCfg(){try{return {...DEF,...JSON.parse(localStorage.getItem('chat-cfg')||'{}')}}catch{return {...DEF}}}
+function saveCfg(){try{localStorage.setItem('chat-cfg',JSON.stringify(cfg))}catch{}}
+function loadHist(){try{return JSON.parse(localStorage.getItem('chat2-hist')||'[]')}catch{return []}}
+function strip(m){return Array.isArray(m.content)?{...m,content:m.content.map(p=>p.type==='image_url'?{type:'text',text:'[фото]'}:p)}:m}
+function saveHist(){try{localStorage.setItem('chat2-hist',JSON.stringify(history.map(strip)))}catch{}}
+function base(){let s=(cfg.endpoint||'/api').trim();while(s.endsWith('/'))s=s.slice(0,-1);return s}
+function toast(t,err){const d=document.createElement('div');d.className='toast'+(err?' err':'');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),5000)}
+function scroll(){$('log').scrollTop=$('log').scrollHeight}
+function md(t){try{return DOMPurify.sanitize(marked.parse(t,{breaks:true}))}catch{const d=document.createElement('div');d.textContent=t;return d.innerHTML}}
+function decorate(el){el.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='copy';b.textContent='копировать';b.onclick=()=>{const c=pre.querySelector('code');navigator.clipboard.writeText((c||pre).innerText);b.textContent='готово';setTimeout(()=>b.textContent='копировать',1200)};pre.appendChild(b)})}
+
+function renderAll(){
+const log=$('log');log.innerHTML='';
+if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки и ходить в MCP.</div>'.split(Q).join(String.fromCharCode(39));return}
+const res={};history.forEach(m=>{if(m.role==='tool')res[m.tool_call_id]=m.content});
+history.forEach(m=>{
+if(m.role==='user')addUser(m);
+else if(m.role==='assistant'){if(m.content)addAI(m.content);(m.tool_calls||[]).forEach(c=>addTool(c,res[c.id]))}
+});
+scroll();
+}
+function addUser(m){
+const d=document.createElement('div');d.className='msg user';
+if(Array.isArray(m.content))m.content.forEach(p=>{if(p.type==='image_url'){const i=document.createElement('img');i.src=p.image_url.url;d.appendChild(i)}else if(!m._ui&&p.type==='text')d.appendChild(document.createTextNode(p.text))});
+(m._ui&&m._ui.files||[]).forEach(n=>{const s=document.createElement('span');s.className='tag';s.textContent='📄 '+n;d.appendChild(s)});
+const t=m._ui?m._ui.text:(typeof m.content==='string'?m.content:'');
+if(t){const x=document.createElement('div');x.textContent=t;d.appendChild(x)}
+$('log').appendChild(d);
+}
+function addAI(t){const d=document.createElement('div');d.className='msg ai';d.innerHTML=md(t);decorate(d);$('log').appendChild(d)}
+function addTool(c,r){
+const d=document.createElement('details');d.className='tool';
+const s=document.createElement('summary');s.textContent='⚙ '+c.function.name;d.appendChild(s);
+const p=document.createElement('pre');p.textContent=c.function.arguments+NL+NL+'→ '+(r===undefined?'выполняется…':String(r).slice(0,3000));d.appendChild(p);
+$('log').appendChild(d);
+}
+
+function renderChips(){
+const c=$('chips');c.innerHTML='';
+pending.forEach((p,i)=>{
+const d=document.createElement('div');d.className='chip';
+if(p.kind==='img'){const im=document.createElement('img');im.src=p.url;d.appendChild(im)}
+const n=document.createElement('span');n.textContent=p.name.slice(0,22);d.appendChild(n);
+const x=document.createElement('button');x.type='button';x.textContent='×';x.onclick=()=>{pending.splice(i,1);renderChips()};d.appendChild(x);
+c.appendChild(d);
+});
+}
+function imgData(f){return new Promise((ok,no)=>{const u=URL.createObjectURL(f);const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',0.85))};im.onerror=()=>no(new Error('не удалось открыть картинку'));im.src=u})}
+async function pdfText(f){
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const doc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let out='';
+for(let i=1;i<=doc.numPages&&i<=60;i++){const pg=await doc.getPage(i);const c=await pg.getTextContent();out+=c.items.map(x=>x.str).join(' ')+NL+NL}
+return out;
+}
+async function addFiles(list){
+for(const f of list){
+try{
+if(f.type.startsWith('image/'))pending.push({kind:'img',name:f.name||'фото',url:await imgData(f)});
+else if(f.name.toLowerCase().endsWith('.pdf'))pending.push({kind:'txt',name:f.name,text:await pdfText(f)});
+else{if(f.size>3000000)throw new Error('файл больше 3 МБ');const t=await f.text();if(t.includes(String.fromCharCode(0)))throw new Error('бинарный файл не поддерживается');pending.push({kind:'txt',name:f.name,text:t})}
+}catch(e){toast(f.name+': '+e.message,true)}
+}
+renderChips();
+}
+
+function runJS(code){return new Promise(res=>{
+const src='const logs=[];const f=(...a)=>logs.push(a.map(x=>typeof x==="string"?x:JSON.stringify(x)).join(" "));console.log=f;console.error=f;console.warn=f;onmessage=async e=>{try{const AF=Object.getPrototypeOf(async function(){}).constructor;const r=await new AF(e.data)();postMessage({logs,result:r===undefined?undefined:(typeof r==="string"?r:JSON.stringify(r))})}catch(err){postMessage({logs,error:String(err)})}}';
+const w=new Worker(URL.createObjectURL(new Blob([src])));
+const t=setTimeout(()=>{w.terminate();res('Таймаут 10 с')},10000);
+w.onmessage=e=>{clearTimeout(t);w.terminate();res(JSON.stringify(e.data))};
+w.postMessage(code);
+})}
+async function px(url,method,headers,body){
+const r=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url,method,headers,body})});
+if(!r.ok)throw new Error('proxy '+r.status);return r.json();
+}
+async function fetchUrl(url){
+const r=await px(url,'GET',{});let t=r.body;
+if((r.headers['content-type']||'').includes('html'))t=new DOMParser().parseFromString(t,'text/html').body.textContent;
+return 'HTTP '+r.status+NL+t.split(NL).map(x=>x.trim()).filter(Boolean).join(NL).slice(0,20000);
+}
+
+// ---------- OAuth ----------
+function b64u(buf){let s='';new Uint8Array(buf).forEach(b=>s+=String.fromCharCode(b));return btoa(s).split('+').join('-').split('/').join('_').split('=').join('')}
+async function pkce(){const v=b64u(crypto.getRandomValues(new Uint8Array(32)));const c=b64u(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)));return {v,c}}
+async function jget(url){const r=await px(url,'GET',{Accept:'application/json'});if(r.status>=400)throw new Error(url+' '+r.status);return JSON.parse(r.body)}
+async function discover(url){
+let prmUrl=null;const u0=new URL(url);const o=u0.origin;
+try{
+const r=await px(url,'POST',{'Content-Type':'application/json',Accept:'application/json, text/event-stream'},JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-03-26',capabilities:{},clientInfo:{name:'web-chat',version:'1'}}}));
+const wa=r.headers['www-authenticate']||'';
+if(wa.includes('resource_metadata='))prmUrl=wa.split('resource_metadata=')[1].split(Q)[1];
+}catch{}
+let prm=null;
+for(const u of [prmUrl,o+'/.well-known/oauth-protected-resource'+u0.pathname,o+'/.well-known/oauth-protected-resource']){if(!u)continue;try{prm=await jget(u);break}catch{}}
+let issuer=(prm&&prm.authorization_servers&&prm.authorization_servers[0])||(o.includes('googleapis.com')?'https://accounts.google.com':o);
+while(issuer.endsWith('/'))issuer=issuer.slice(0,-1);
+let asm=null;
+for(const u of [issuer+'/.well-known/oauth-authorization-server',issuer+'/.well-known/openid-configuration']){try{asm=await jget(u);break}catch{}}
+if(!asm)throw new Error('не нашёл OAuth-настройки сервера');
+return {prm,asm};
+}
+async function oauthLogin(url,cid,sec,scope){
+const {prm,asm}=await discover(url);
+let client=cid;
+if(!client){
+if(!asm.registration_endpoint)throw new Error('серверу нужен Client ID: создай OAuth client и впиши его');
+const r=await px(asm.registration_endpoint,'POST',{'Content-Type':'application/json'},JSON.stringify({client_name:'web-chat',redirect_uris:[REDIR],grant_types:['authorization_code','refresh_token'],response_types:['code'],token_endpoint_auth_method:'none'}));
+let j={};try{j=JSON.parse(r.body)}catch{}
+if(!j.client_id)throw new Error('регистрация клиента не прошла: '+String(r.body).slice(0,150));
+client=j.client_id;
+}
+const {v,c}=await pkce();const state=b64u(crypto.getRandomValues(new Uint8Array(12)));
+const isG=url.includes('googleapis.com');
+let sc=scope||(prm&&prm.scopes_supported?prm.scopes_supported.join(' '):'');
+if(!sc&&isG)sc='https://www.googleapis.com/auth/gmail.readonly';
+localStorage.setItem('oauth-pending',JSON.stringify({url,client,sec,v,state,token:asm.token_endpoint}));
+const p=new URLSearchParams({response_type:'code',client_id:client,redirect_uri:REDIR,code_challenge:c,code_challenge_method:'S256',state});
+if(sc)p.set('scope',sc);
+if(isG){p.set('access_type','offline');p.set('prompt','consent')}
+location.href=asm.authorization_endpoint+'?'+p.toString();
+}
+async function tokenReq(endpoint,params){
+const r=await px(endpoint,'POST',{'Content-Type':'application/x-www-form-urlencoded',Accept:'application/json'},new URLSearchParams(params).toString());
+let j;try{j=JSON.parse(r.body)}catch{throw new Error('token '+r.status)}
+if(!j.access_token)throw new Error(j.error_description||j.error||'нет access_token');
+return j;
+}
+async function finishOauth(q){
+const pend=JSON.parse(localStorage.getItem('oauth-pending')||'null');
+history_clean();
+if(!pend||pend.state!==q.get('state')){toast('OAuth: неверный state',true);return}
+try{
+const params={grant_type:'authorization_code',code:q.get('code'),redirect_uri:REDIR,client_id:pend.client,code_verifier:pend.v};
+if(pend.sec)params.client_secret=pend.sec;
+const j=await tokenReq(pend.token,params);
+cfg.oauth=cfg.oauth||{};
+cfg.oauth[pend.url]={access:j.access_token,refresh:j.refresh_token||'',exp:Date.now()+(j.expires_in||3600)*1000,client:pend.client,sec:pend.sec||'',token:pend.token};
+saveCfg();localStorage.removeItem('oauth-pending');toast('OAuth: вход выполнен');
+}catch(e){toast('OAuth: '+e.message,true)}
+}
+function history_clean(){window.history.replaceState(null,'',location.pathname)}
+async function freshToken(url){
+const o=(cfg.oauth||{})[url];if(!o)return '';
+if(o.exp-60000<Date.now()&&o.refresh){
+try{
+const params={grant_type:'refresh_token',refresh_token:o.refresh,client_id:o.client};
+if(o.sec)params.client_secret=o.sec;
+const j=await tokenReq(o.token,params);
+o.access=j.access_token;if(j.refresh_token)o.refresh=j.refresh_token;o.exp=Date.now()+(j.expires_in||3600)*1000;saveCfg();
+}catch(e){toast('OAuth refresh: '+e.message,true)}
+}
+return o.access;
+}
+
+// ---------- MCP ----------
+async function rpc(s,method,params,note){
+if(s.oauth)s.token=await freshToken(s.url);
+const body={jsonrpc:'2.0',method,params};if(!note)body.id=++s.id;
+const h={'Content-Type':'application/json','Accept':'application/json, text/event-stream'};
+if(s.token)h.Authorization='Bearer '+s.token;if(s.sid)h['Mcp-Session-Id']=s.sid;
+const r=await px(s.url,'POST',h,JSON.stringify(body));
+if(r.headers['mcp-session-id'])s.sid=r.headers['mcp-session-id'];
+if(note)return null;
+let msg;
+if((r.headers['content-type']||'').includes('event-stream')){for(const l of r.body.split(NL)){if(l.startsWith('data:')){try{const j=JSON.parse(l.slice(5));if(j.id===body.id)msg=j}catch{}}}}
+else{try{msg=JSON.parse(r.body)}catch{}}
+if(!msg)throw new Error((r.status===401?'нужен вход (OAuth) — ':'')+'MCP '+r.status+': '+String(r.body).slice(0,150));
+if(msg.error)throw new Error(msg.error.message);
+return msg.result;
+}
+async function connectMcp(){
+mcpTools=[];
+const lines=(cfg.mcp||'').split(NL).map(x=>x.trim()).filter(Boolean);
+for(let i=0;i<lines.length;i++){
+const [url,token]=lines[i].split('|').map(x=>x.trim());const s={url,token:token||'',id:0,sid:null,oauth:!token&&!!(cfg.oauth||{})[url]};
+try{
+await rpc(s,'initialize',{protocolVersion:'2025-03-26',capabilities:{},clientInfo:{name:'web-chat',version:'1'}});
+await rpc(s,'notifications/initialized',{},true);
+const r=await rpc(s,'tools/list',{});
+(r.tools||[]).forEach(t=>mcpTools.push({s,name:t.name,def:{type:'function',function:{name:('m'+i+'_'+t.name).slice(0,64),description:(t.description||'').slice(0,500),parameters:t.inputSchema||{type:'object',properties:{}}}}}));
+toast('MCP '+(i+1)+': инструментов '+(r.tools||[]).length);
+}catch(e){toast('MCP '+(i+1)+': '+e.message,true)}
+}
+}
+async function runTool(c){
+try{
+let a={};try{a=JSON.parse(c.args||'{}')}catch{return 'Ошибка: неверные аргументы'}
+if(c.name==='run_js')return await runJS(a.code||'');
+if(c.name==='fetch_url')return await fetchUrl(a.url);
+const t=mcpTools.find(x=>x.def.function.name===c.name);
+if(t){
+if(/send|delete|forward|trash|reply|edit/.test(t.name)&&!confirm('Разрешить действие '+t.name+'?'+NL+JSON.stringify(a).slice(0,600)))return 'Пользователь отклонил действие';
+const r=await rpc(t.s,'tools/call',{name:t.name,arguments:a});return ((r.content||[]).map(x=>x.text||('['+x.type+']')).join(NL)||JSON.stringify(r)).slice(0,20000)}
+return 'Неизвестный инструмент';
+}catch(e){return 'Ошибка: '+e.message}
+}
+
+async function turn(signal){
+const msgs=[];if(cfg.system)msgs.push({role:'system',content:cfg.system});
+history.forEach(({_ui,...m})=>msgs.push(m));
+const body={model:cfg.model,messages:msgs,stream:true};
+const tl=cfg.tools?[...BUILTIN,...mcpTools.map(t=>t.def)]:[];if(tl.length)body.tools=tl;
+const res=await fetch(base()+'/chat/completions',{method:'POST',signal,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)});
+if(!res.ok)throw new Error('HTTP '+res.status+': '+(await res.text()).slice(0,300));
+const live=document.createElement('div');live.className='msg ai';live.innerHTML='<span class="dots"><span></span><span></span><span></span></span>'.split(Q).join(String.fromCharCode(39));
+$('log').appendChild(live);scroll();
+const rd=res.body.getReader(),dec=new TextDecoder();let buf='',content='',raf=0;const calls=[];
+try{
+while(true){
+const {done,value}=await rd.read();if(done)break;
+buf+=dec.decode(value,{stream:true});const lines=buf.split(NL);buf=lines.pop();
+for(const l of lines){
+const s=l.trim();if(!s.startsWith('data:'))continue;const d=s.slice(5).trim();if(d==='[DONE]')continue;
+let j;try{j=JSON.parse(d)}catch{continue}
+const dl=j.choices&&j.choices[0]&&j.choices[0].delta;if(!dl)continue;
+if(dl.content){content+=dl.content;if(!raf)raf=requestAnimationFrame(()=>{raf=0;live.innerHTML=md(content);scroll()})}
+for(const tc of dl.tool_calls||[]){const c=calls[tc.index||0]||(calls[tc.index||0]={id:'',name:'',args:''});if(tc.id)c.id=tc.id;if(tc.function){if(tc.function.name)c.name+=tc.function.name;if(tc.function.arguments)c.args+=tc.function.arguments}}
+}
+}
+}finally{live.remove()}
+return {content,calls:calls.filter(Boolean)};
+}
+function setBusy(b){busy=b;$('send').textContent=b?'■':'↑'}
+async function agent(){
+setBusy(true);ctrl=new AbortController();
+try{
+for(let step=0;step<8;step++){
+const r=await turn(ctrl.signal);
+if(!r.content&&!r.calls.length)throw new Error('Пустой ответ от сервера');
+const m={role:'assistant',content:r.content||null};
+if(r.calls.length)m.tool_calls=r.calls.map(c=>({id:c.id||('call_'+step),type:'function',function:{name:c.name,arguments:c.args||'{}'}}));
+history.push(m);renderAll();
+if(!r.calls.length)break;
+for(let k=0;k<r.calls.length;k++){const c=r.calls[k];const out=ctrl.signal.aborted?'Отменено':await runTool(c);history.push({role:'tool',tool_call_id:m.tool_calls[k].id,content:out});renderAll()}
+if(ctrl.signal.aborted)break;
+}
+}catch(e){if(e.name!=='AbortError')toast(e.message,true)}
+finally{setBusy(false);saveHist();renderAll()}
+}
+async function send(){
+const inp=$('input');const text=inp.value.trim();
+if(!text&&!pending.length)return;
+if(!cfg.key){openSet();return}
+let body=text;const imgs=[];
+pending.forEach(p=>{if(p.kind==='img')imgs.push(p.url);else body+=NL+NL+'[Файл: '+p.name+']'+NL+'```'+NL+p.text.slice(0,60000)+NL+'```'});
+const content=imgs.length?[{type:'text',text:body||'Опиши изображение'},...imgs.map(u=>({type:'image_url',image_url:{url:u}}))]:body;
+history.push({role:'user',content,_ui:{text,files:pending.filter(p=>p.kind==='txt').map(p=>p.name)}});
+pending=[];renderChips();inp.value='';fit();renderAll();
+await agent();
+}
+
+function openSet(){
+$('key').value=cfg.key;$('endpoint').value=cfg.endpoint;$('model').value=cfg.model;$('system').value=cfg.system;$('tools').checked=cfg.tools;$('mcp').value=cfg.mcp;
+$('redir').textContent='Redirect URI для OAuth-клиента: '+REDIR;
+$('dlg').showModal();
+}
+function collect(){
+cfg={...cfg,key:$('key').value.trim(),endpoint:$('endpoint').value.trim()||'/api',model:$('model').value.trim()||DEF.model,system:$('system').value.trim(),tools:$('tools').checked,mcp:$('mcp').value.trim()};
+saveCfg();
+}
+$('set').onclick=openSet;
+$('cancel').onclick=()=>$('dlg').close();
+$('save').onclick=async()=>{
+const old=cfg.mcp;collect();$('dlg').close();
+if(cfg.mcp!==old||!mcpTools.length)await connectMcp();
+};
+$('ologin').onclick=async()=>{
+const url=$('ourl').value.trim();
+if(!url){toast('Впиши URL MCP сервера',true);return}
+collect();
+if(!(cfg.mcp||'').split(NL).some(l=>l.split('|')[0].trim()===url)){cfg.mcp=(cfg.mcp?cfg.mcp+NL:'')+url;saveCfg()}
+try{await oauthLogin(url,$('ocid').value.trim(),$('osec').value.trim(),$('oscope').value.trim())}catch(e){toast(e.message,true)}
+};
+
+// ---------- Telegram ----------
+async function tgCall(b){
+const r=await fetch('/api/tg',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+let j;try{j=await r.json()}catch{throw new Error('сервер вернул '+r.status)}
+if(j.error)throw new Error(j.error);return j;
+}
+function tgStatus(t){$('tgst').textContent=t}
+$('tgcode').onclick=async()=>{
+const api_id=$('tgid').value.trim(),api_hash=$('tghash').value.trim(),phone=$('tgphone').value.trim();
+if(!api_id||!api_hash||!phone){toast('Заполни api_id, api_hash и номер',true);return}
+tgStatus('Отправляю код…');
+try{
+const r=await tgCall({tg_login:'send_code',api_id,api_hash,phone});
+tgState={api_id,api_hash,phone,session:r.session,phone_code_hash:r.phone_code_hash,need_password:false};
+tgStatus('Код отправлен в Telegram. Впиши его и нажми «Войти в Telegram».');
+}catch(e){tgStatus('');toast('Telegram: '+e.message,true)}
+};
+$('tgin').onclick=async()=>{
+if(!tgState){toast('Сначала получи код',true);return}
+try{
+const r=await tgCall({tg_login:'sign_in',...tgState,code:$('tgc').value.trim(),password:$('tgpw').value});
+if(r.need_password){tgState.session=r.session;tgState.need_password=true;tgStatus('Нужен пароль 2FA. Впиши его и нажми «Войти в Telegram» ещё раз.');return}
+const token=btoa(JSON.stringify({api_id:tgState.api_id,api_hash:tgState.api_hash,session:r.session}));
+const mine=location.origin+'/api/tg|';
+collect();
+const keep=(cfg.mcp||'').split(NL).filter(l=>l.trim()&&!l.startsWith(mine));
+keep.push(mine+token);cfg.mcp=keep.join(NL);saveCfg();$('mcp').value=cfg.mcp;
+$('tgc').value='';$('tgpw').value='';tgState=null;
+tgStatus('Вошёл как '+r.me+'. Сессия добавлена в список MCP.');
+await connectMcp();
+}catch(e){toast('Telegram: '+e.message,true)}
+};
+
+$('models').innerHTML=MODELS.map(m=>'<option value='+m+'>').join('');
+$('new').onclick=()=>{if(busy&&ctrl)ctrl.abort();history=[];saveHist();renderAll()};
+$('attach').onclick=()=>$('file').click();
+$('file').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
+document.addEventListener('paste',e=>{const fs=[...(e.clipboardData?e.clipboardData.files:[])];if(fs.length){e.preventDefault();addFiles(fs)}});
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer&&e.dataTransfer.files.length)addFiles([...e.dataTransfer.files])});
+$('form').addEventListener('submit',e=>{e.preventDefault();if(busy){ctrl.abort();return}send()});
+function fit(){const i=$('input');i.style.height='auto';i.style.height=Math.min(i.scrollHeight,160)+'px'}
+$('input').addEventListener('input',fit);
+$('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!matchMedia('(pointer:coarse)').matches){e.preventDefault();$('form').requestSubmit()}});
+
+(async()=>{
+const q=new URLSearchParams(location.search);
+if(q.get('code')&&q.get('state'))await finishOauth(q);
+else if(q.get('error')){toast('OAuth: '+q.get('error'),true);history_clean()}
+renderAll();
+if(!cfg.key)setTimeout(openSet,300);
+if(cfg.mcp)connectMcp();
+})();
+</script>
+</body>
+</html>
