@@ -18,6 +18,7 @@ header h1{font-size:16px;font-weight:600;flex:1;white-space:nowrap;overflow:hidd
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer}
 .btn:hover{border-color:var(--accent)}
 .btn svg{width:16px;height:16px;flex:none}
+.btn.on{border-color:var(--accent);color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #log{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:12px}
 .msg{max-width:min(760px,92%);padding:10px 14px;border-radius:16px;border:1px solid var(--line);overflow-wrap:anywhere}
@@ -45,6 +46,20 @@ details.tool{align-self:flex-start;max-width:min(760px,92%);font-size:13px;color
 details.tool summary{cursor:pointer;display:flex;align-items:center;gap:7px}
 details.tool summary svg{width:14px;height:14px;flex:none}
 details.tool pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:240px;overflow:auto;color:var(--text)}
+details.think{align-self:flex-start;max-width:min(760px,92%);font-size:13px;color:var(--muted);border:1px dashed #4d3a75;border-radius:12px;padding:6px 12px;background:#b79cff08}
+details.think summary{cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--accent)}
+details.think summary svg{width:14px;height:14px;flex:none}
+details.think .txt{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;margin-top:6px;color:var(--muted)}
+details.think.live{border-style:solid}
+details.sub{align-self:flex-start;max-width:min(760px,92%);font-size:13px;color:var(--muted);border:1px dashed var(--accent);border-radius:12px;padding:6px 12px;background:#b79cff0a}
+details.sub summary{cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--accent)}
+details.sub summary svg{width:14px;height:14px}
+details.sub pre{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-all;margin-top:6px;max-height:300px;overflow:auto;color:var(--text)}
+.outfile{display:flex;align-items:center;gap:10px;background:#0b0a0f;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:8px;font-size:13px}
+.outfile svg{width:18px;height:18px;flex:none;color:var(--accent)}
+.outfile .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.outfile .dl{color:var(--accent);text-decoration:none;font-size:12px;border:1px solid var(--line);border-radius:8px;padding:4px 10px;flex:none}
+.outfile .dl:hover{border-color:var(--accent)}
 .empty{margin:auto;text-align:center;color:var(--muted);line-height:1.7;padding:0 20px}
 #bar{border-top:1px solid var(--line);background:rgba(14,13,18,.85);padding:10px 14px}
 #chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -90,7 +105,7 @@ dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
 </style>
 </head>
 <body>
-<header><button class='btn' id='chats' aria-label='Чаты'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg></button><h1>Чат с ИИ</h1><span id='tick'></span><button class='btn' id='temp' title='Временный чат — ничего не сохраняется'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='13' r='8'/><path d='M12 9v4l2.5 2.5M5 3 2 6m17-3 3 3'/></svg></button><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
+<header><button class='btn' id='chats' aria-label='Чаты'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M4 7h16M4 12h16M4 17h16'/></svg></button><h1>Чат с ИИ</h1><span id='tick'></span><button class='btn' id='think' title='Думающий режим — модель рассуждает вслух перед ответом'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m.08 4h.01'/><circle cx='12' cy='12' r='10'/></svg></button><button class='btn' id='agent' title='Агентский режим — может звать помощника'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='8' r='4'/><path d='M4 21v-1a7 7 0 0 1 7-7h2a7 7 0 0 1 7 7v1'/></svg></button><button class='btn' id='temp' title='Временный чат — ничего не сохраняется'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='13' r='8'/><path d='M12 9v4l2.5 2.5M5 3 2 6m17-3 3 3'/></svg></button><button class='btn' id='new'>Новый</button><button class='btn' id='set'>Настройки</button></header>
 <aside id='side'><div class='side-head'><b>Чаты</b><button class='btn' id='side-new'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round'><path d='M12 5v14M5 12h14'/></svg>Новый</button></div><input id='chat-q' type='text' placeholder='Поиск по чатам…'><div id='chatlist'></div></aside>
 <div id='scrim'></div>
 <main id='log'></main>
@@ -106,6 +121,7 @@ dialog textarea{min-height:70px;font-family:var(--mono);font-size:12.5px}
 <label for='model'>Модель</label><input id='model' type='text' list='models' spellcheck='false'><datalist id='models'></datalist>
 <label for='system'>Системный промпт</label><textarea id='system' placeholder='Например: отвечай коротко'></textarea>
 <label style='display:flex;gap:8px;align-items:center;color:var(--text)'><input type='checkbox' id='tools'> Инструменты (код, ссылки, MCP)</label>
+<label for='gh'>GitHub token (для моих коммитов, fine-grained PAT)</label><input id='gh' type='password' autocomplete='off' spellcheck='false' placeholder='github_pat_...'>
 <label for='mcp'>MCP серверы (по одному в строке: url или url|токен)</label><textarea id='mcp' spellcheck='false' placeholder='https://mcp.vercel.com'></textarea>
 <label>Вход через OAuth (для серверов без токена)</label>
 <input id='ourl' type='text' placeholder='URL MCP сервера' spellcheck='false'>
@@ -132,7 +148,7 @@ const NL=String.fromCharCode(10);
 const Q=String.fromCharCode(34);
 const REDIR=location.origin+'/';
 const MODELS=['claude-opus-5','claude-opus-4-8','claude-opus-4-7','claude-sonnet-5','claude-sonnet-4-6','claude-haiku-4-5','claude-fable-5'];
-const DEF={key:'',endpoint:'/api',model:'claude-sonnet-5',system:'',tools:true,mcp:'',oauth:{}};
+const DEF={key:'',endpoint:'/api',model:'claude-sonnet-5',system:'',tools:true,mcp:'',oauth:{},gh:''};
 const IC={
 send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></svg>',
 stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
@@ -141,22 +157,33 @@ file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1
 x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
 redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>',
 copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>'
+edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>',
+brain:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m.08 4h.01"/></svg>',
+sub:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20v-1a6.5 6.5 0 0 1 6.5-6.5h1"/><circle cx="17.5" cy="10" r="2.5"/><path d="M14.5 20v-.8a4.5 4.5 0 0 1 4.5-4.5 4.5 4.5 0 0 1 4.5 4.5v.8"/></svg>',
+dl:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 21h16"/></svg>'
 };
 const BUILTIN=[
 {type:'function',function:{name:'run_js',description:'Run JavaScript in an isolated browser worker (no DOM, 10s limit). Use console.log or return a value. Good for math, parsing, data processing.',parameters:{type:'object',properties:{code:{type:'string'}},required:['code']}}},
-{type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}}
+{type:'function',function:{name:'fetch_url',description:'HTTP GET a URL and return its text content (up to 20000 chars).',parameters:{type:'object',properties:{url:{type:'string'}},required:['url']}}},
+{type:'function',function:{name:'remember',description:'Save a durable fact about the user or project to memory. Facts persist across chats. Call sparingly, only for things worth remembering long-term.',parameters:{type:'object',properties:{text:{type:'string'}},required:['text']}}},
+{type:'function',function:{name:'forget',description:'Remove a fact from memory by its exact text or a substring.',parameters:{type:'object',properties:{text:{type:'string'}},required:['text']}}},
+{type:'function',function:{name:'read_file',description:'Read a slice of an attached file stored in this chat. name is the filename from [Файл: name]. Returns chars offset..offset+limit (default 0..8000).',parameters:{type:'object',properties:{name:{type:'string'},offset:{type:'integer'},limit:{type:'integer'}},required:['name']}}},
+{type:'function',function:{name:'gh',description:'GitHub API: read/write files in my repos. action: list|read|write. repo like "owner/name". For write provide path, content, message, optional branch.',parameters:{type:'object',properties:{action:{type:'string'},repo:{type:'string'},path:{type:'string'},content:{type:'string'},message:{type:'string'},branch:{type:'string'}},required:['action','repo']}}},
+{type:'function',function:{name:'delegate',description:'Spawn a sub-agent (fresh context, same tools minus delegate) to solve a self-contained subtask, e.g. research, code draft, verification. Give it full context in task. Returns its final answer.',parameters:{type:'object',properties:{task:{type:'string'}},required:['task']}}},
+{type:'function',function:{name:'send_file',description:'Attach a file to my reply so the user can download it (code, report, etc).',parameters:{type:'object',properties:{name:{type:'string'},content:{type:'string'}},required:['name','content']}}}
 ];
-let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false,tempChat=false,tickT=null;
+let cfg=loadCfg(),chats=loadChats(),cur='',history=[],pending=[],busy=false,ctrl=null,mcpTools=[],tgState=null,imgRetry=false,tempChat=false,thinkMode=false,agentMode=true,tickT=null,chatFiles={};
 function loadCfg(){try{return {...DEF,...JSON.parse(localStorage.getItem('chat-cfg')||'{}')}}catch{return {...DEF}}}
 function saveCfg(){try{localStorage.setItem('chat-cfg',JSON.stringify(cfg))}catch{}}
 function loadHist(){try{return JSON.parse(localStorage.getItem('chat2-hist')||'[]')}catch{return []}}
 function loadChats(){try{return JSON.parse(localStorage.getItem('chat2-chats')||'[]')}catch{return []}}
+function mem(){try{return JSON.parse(localStorage.getItem('chat2-mem')||'[]')}catch{return []}}
+function setMem(a){try{localStorage.setItem('chat2-mem',JSON.stringify(a.slice(-100)))}catch{}}
 function firstTitle(h){const u=(h||[]).find(m=>m.role==='user');if(!u)return '';const t=u._ui?u._ui.text:(typeof u.content==='string'?u.content:(Array.isArray(u.content)?((u.content.find(p=>p.type==='text')||{}).text||''):''));return (t||'').trim().slice(0,42)}
 (function(){try{
 cur=localStorage.getItem('chat2-cur')||'';
 if(!chats.length){const oh=loadHist();if(oh.length){chats=[{id:'c'+Date.now(),title:firstTitle(oh)||'Чат',created:Date.now(),updated:Date.now(),msgs:oh}];cur=chats[0].id;localStorage.setItem('chat2-chats',JSON.stringify(chats));localStorage.setItem('chat2-cur',cur);localStorage.removeItem('chat2-hist')}}
-const c=chats.find(x=>x.id===cur);if(c)history=c.msgs||[];else cur='';
+const c=chats.find(x=>x.id===cur);if(c){history=c.msgs||[];chatFiles=c.files||{}}else cur='';
 }catch{}})();
 function strip(m){return Array.isArray(m.content)?{...m,content:m.content.map(p=>p.type==='image_url'?{type:'text',text:'[фото]'}:p)}:m}
 function saveHist(){
@@ -165,7 +192,7 @@ try{
 if(history.length){
 let c=chats.find(x=>x.id===cur);
 if(!c){c={id:'c'+Date.now()+Math.random().toString(36).slice(2,6),title:'Новый чат',created:Date.now(),updated:0,msgs:[]};chats.unshift(c);cur=c.id}
-c.msgs=history.map(strip);c.updated=Date.now();
+c.msgs=history.map(strip);c.updated=Date.now();c.files=chatFiles;
 if(c.title==='Новый чат')c.title=firstTitle(history)||c.title;
 }else if(cur){chats=chats.filter(x=>x.id!==cur);cur=''}
 localStorage.setItem('chat2-chats',JSON.stringify(chats));
@@ -178,14 +205,20 @@ function toast(t,err){const d=document.createElement('div');d.className='toast'+
 function scroll(){$('log').scrollTop=$('log').scrollHeight}
 function md(t){try{return DOMPurify.sanitize(marked.parse(t,{breaks:true}))}catch{const d=document.createElement('div');d.textContent=t;return d.innerHTML}}
 function decorate(el){el.querySelectorAll('pre').forEach(pre=>{const b=document.createElement('button');b.className='copy';b.textContent='копировать';b.onclick=()=>{const c=pre.querySelector('code');navigator.clipboard.writeText((c||pre).innerText);b.textContent='готово';setTimeout(()=>b.textContent='копировать',1200)};pre.appendChild(b)})}
-
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function splitThink(t){const i=t.indexOf('</think>');if(i<0)return{think:t.startsWith('<think>')?t.slice(7):'',text:t.startsWith('<think>')?'':t};return{think:t.slice(7,i),text:t.slice(i+8).trimStart()}}
+function addThink(el,txt){el.innerHTML=IC.brain+'<span>'+esc(txt.slice(0,120))+(txt.length>120?'…':'')+'</span>';if(txt.length>120){const d=document.createElement('div');d.className='txt';d.textContent=txt;el.appendChild(d)}}
 function renderAll(){
 const log=$('log');log.innerHTML='';
-if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки и ходить в MCP.<br>Старые диалоги — в меню слева сверху.</div>';return}
+if(!history.length){log.innerHTML='<div class="empty">Кинь фото, файл или PDF и спрашивай.<br>Я умею считать кодом, читать ссылки, ходить в MCP,<br>коммитить в твой GitHub и звать помощника.</div>';return}
 const res={};history.forEach(m=>{if(m.role==='tool')res[m.tool_call_id]=m.content});
 history.forEach(m=>{
 if(m.role==='user')addUser(m);
-else if(m.role==='assistant'){if(m.content)addAI(m.content);(m.tool_calls||[]).forEach(c=>addTool(c,res[c.id]))}
+else if(m.role==='assistant'){
+if(m.content){const p=splitThink(m.content);if(p.think){const d=document.createElement('details');d.className='think';const s=document.createElement('summary');s.innerHTML=IC.brain+'<span>рассуждение</span>';d.appendChild(s);const t=document.createElement('div');t.className='txt';t.textContent=p.think;d.appendChild(t);log.appendChild(d);addAI(p.text||' ')}else addAI(m.content)}
+if(m._files)m._files.forEach(f=>addOutFile(f));
+(m.tool_calls||[]).forEach(c=>addTool(c,res[c.id]));
+}
 });
 const lastA=[...history].reverse().find(m=>m.role==='assistant');
 const bubbles=log.querySelectorAll('.msg.ai');const last=bubbles[bubbles.length-1];
@@ -212,11 +245,26 @@ if(t){const x=document.createElement('div');x.textContent=t;d.appendChild(x)}
 $('log').appendChild(d);
 }
 function addAI(t){const d=document.createElement('div');d.className='msg ai';d.innerHTML=md(t);decorate(d);$('log').appendChild(d)}
+function addOutFile(f){
+const d=document.createElement('div');d.className='msg ai';
+const w=document.createElement('div');w.className='outfile';w.innerHTML=IC.file;
+const n=document.createElement('span');n.className='nm';n.textContent=f.name;w.appendChild(n);
+const a=document.createElement('a');a.className='dl';a.textContent='скачать';
+const blob=new Blob([f.content],{type:'text/plain;charset=utf-8'});a.href=URL.createObjectURL(blob);a.download=f.name;
+w.appendChild(a);d.appendChild(w);$('log').appendChild(d);
+}
 function addTool(c,r){
 const d=document.createElement('details');d.className='tool';
-const s=document.createElement('summary');s.innerHTML=IC.gear;s.appendChild(document.createTextNode(c.function.name));d.appendChild(s);
+const isSub=c.function.name==='delegate';
+const s=document.createElement('summary');s.innerHTML=isSub?IC.sub:IC.gear;s.appendChild(document.createTextNode(c.function.name));d.appendChild(s);
 const p=document.createElement('pre');p.textContent=c.function.arguments+NL+NL+'→ '+(r===undefined?'выполняется…':String(r).slice(0,3000));d.appendChild(p);
 $('log').appendChild(d);
+}
+function addSub(task,res){
+const d=document.createElement('details');d.className='sub';
+const s=document.createElement('summary');s.innerHTML=IC.sub;s.appendChild(document.createTextNode('помощник: '+task.slice(0,80)));d.appendChild(s);
+const p=document.createElement('pre');p.textContent='ЗАДАЧА:'+NL+task+NL+NL+'ОТЧЁТ:'+NL+res;d.appendChild(p);
+$('log').appendChild(d);scroll();
 }
 
 function closeSide(){$('side').classList.remove('open');$('scrim').classList.remove('open')}
@@ -228,7 +276,7 @@ const d=document.createElement('div');d.className='chatit'+(c.id===cur?' cur':''
 const t=document.createElement('span');t.className='t';t.textContent=c.title||'Чат';d.appendChild(t);
 const dt=document.createElement('span');dt.className='d';dt.textContent=c.updated?new Date(c.updated).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'}):'';d.appendChild(dt);
 const x=document.createElement('button');x.className='x';x.innerHTML=IC.x;x.title='Удалить';
-x.onclick=e=>{e.stopPropagation();if(!confirm('Удалить «'+(c.title||'Чат')+'»?'))return;if(cur===c.id){if(busy&&ctrl)ctrl.abort();cur='';history=[];try{localStorage.removeItem('chat2-cur')}catch{}}chats=chats.filter(y=>y.id!==c.id);try{localStorage.setItem('chat2-chats',JSON.stringify(chats))}catch{}renderChats();renderAll()};
+x.onclick=e=>{e.stopPropagation();if(!confirm('Удалить «'+(c.title||'Чат')+'»?'))return;if(cur===c.id){if(busy&&ctrl)ctrl.abort();cur='';history=[];chatFiles={};try{localStorage.removeItem('chat2-cur')}catch{}}chats=chats.filter(y=>y.id!==c.id);try{localStorage.setItem('chat2-chats',JSON.stringify(chats))}catch{}renderChats();renderAll()};
 d.appendChild(x);
 d.onclick=()=>openChat(c.id);
 l.appendChild(d);
@@ -239,13 +287,13 @@ function openChat(id){
 if(id===cur){closeSide();return}
 if(busy&&ctrl)ctrl.abort();
 const c=chats.find(x=>x.id===id);if(!c)return;
-cur=id;history=c.msgs||[];tempChat=false;$('temp').style.borderColor='';
+cur=id;history=c.msgs||[];chatFiles=c.files||{};tempChat=false;$('temp').classList.remove('on');
 try{localStorage.setItem('chat2-cur',cur)}catch{}
 closeSide();renderAll();renderChats();
 }
 function newChat(){
 if(busy&&ctrl)ctrl.abort();
-history=[];cur='';pending=[];renderChips();
+history=[];cur='';pending=[];chatFiles={};renderChips();
 try{localStorage.removeItem('chat2-cur')}catch{}
 closeSide();renderAll();renderChats();
 $('input').focus();
@@ -410,11 +458,72 @@ toast('MCP '+(i+1)+': инструментов '+(r.tools||[]).length);
 }catch(e){toast('MCP '+(i+1)+': '+e.message,true)}
 }
 }
+async function ghApi(a){
+if(!cfg.gh)return 'Ошибка: впиши GitHub token в настройках';
+const api='https://api.github.com';
+const h={Authorization:'Bearer '+cfg.gh,Accept:'application/vnd.github+json','Content-Type':'application/json'};
+const [o,r0]=a.repo.split('/');
+try{
+if(a.action==='list'){const r=await px(api+'/repos/'+o+'/'+r0+'/contents/'+(a.path||''),'GET',h);const j=JSON.parse(r.body);return Array.isArray(j)?j.map(x=>x.type+' '+x.path).join(NL).slice(0,15000):JSON.stringify(j)}
+if(a.action==='read'){const r=await px(api+'/repos/'+o+'/'+r0+'/contents/'+a.path+(a.branch?'?ref='+a.branch:''),'GET',h);const j=JSON.parse(r.body);if(j.content)return decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))).slice(0,40000);return JSON.stringify(j).slice(0,8000)}
+if(a.action==='write'){
+if(!a.path||a.content===undefined)return 'Ошибка: нужны path и content';
+let sha;const g=await px(api+'/repos/'+o+'/'+r0+'/contents/'+a.path+(a.branch?'?ref='+a.branch:''),'GET',h);if(g.status===200){try{sha=JSON.parse(g.body).sha}catch{}}
+const body=JSON.stringify({message:a.message||'update '+a.path,content:btoa(unescape(encodeURIComponent(a.content))),sha,branch:a.branch});
+const r=await px(api+'/repos/'+o+'/'+r0+'/contents/'+a.path,'PUT',h,body);const j=JSON.parse(r.body);
+return r.status<300?'Закоммичено: '+(j.commit&&j.commit.html_url||a.path):'Ошибка '+r.status+': '+r.body.slice(0,300);
+}
+return 'Неизвестный action (list/read/write)';
+}catch(e){return 'Ошибка gh: '+e.message}
+}
+async function delegate(task){
+const subHist=[{role:'user',content:task}];
+const tools=cfg.tools?[...BUILTIN.filter(t=>t.function.name!=='delegate'),...mcpTools.map(t=>t.def)]:[];
+let out='',steps=0;
+const maxSub=6;
+for(let i=0;i<maxSub;i++){
+const msgs=[];if(cfg.system)msgs.push({role:'system',content:cfg.system});
+subHist.forEach(m=>msgs.push(m));
+const body={model:cfg.model,messages:msgs,stream:false,tools:tools};
+const r=await fetch(base()+'/chat/completions',{method:'POST',signal:ctrl?ctrl.signal:undefined,headers:{'Content-Type':'application/json',Authorization:'Bearer '+cfg.key},body:JSON.stringify(body)});
+if(!r.ok)return 'Ошибка субагента: HTTP '+r.status;
+const j=await r.json();const msg=j.choices&&j.choices[0]&&j.choices[0].message;if(!msg)return 'Пустой ответ субагента';
+subHist.push({role:'assistant',content:msg.content,tool_calls:msg.tool_calls});
+steps++;
+if(msg.content&&!msg.tool_calls){out=msg.content;break}
+for(const tc of msg.tool_calls||[]){let a={};try{a=JSON.parse(tc.function.arguments||'{}')}catch{continue}
+let res='?';
+if(tc.function.name==='run_js')res=await runJS(a.code||'');
+else if(tc.function.name==='fetch_url')res=await fetchUrl(a.url);
+else if(tc.function.name==='remember'){const m=mem();if(!m.includes(a.text)){m.push(a.text);setMem(m)}res='запомнил'}
+else if(tc.function.name==='forget'){setMem(mem().filter(x=>!x.includes(a.text)));res='забыл'}
+else if(tc.function.name==='read_file'){const t=chatFiles[a.name];res=t===undefined?'нет такого файла':t.slice(a.offset||0,(a.offset||0)+(a.limit||8000))}
+else if(tc.function.name==='gh')res=await ghApi(a);
+else if(tc.function.name==='send_file')res='send_file недоступен субагенту';
+else{const t=mcpTools.find(x=>x.def.function.name===tc.function.name);res=t?await rpc(t.s,'tools/call',{name:t.name,arguments:a}).then(r=>((r.content||[]).map(x=>x.text||'').join(NL)||JSON.stringify(r)).slice(0,15000)):'?'}
+subHist.push({role:'tool',tool_call_id:tc.id,content:String(res)});
+}
+}
+if(!out)out='(субагент закончил без текстового ответа, шагов: '+steps+')';
+addSub(task,out);
+return out;
+}
 async function runTool(c){
 try{
 let a={};try{a=JSON.parse(c.args||'{}')}catch{return 'Ошибка: неверные аргументы'}
 if(c.name==='run_js')return await runJS(a.code||'');
 if(c.name==='fetch_url')return await fetchUrl(a.url);
+if(c.name==='remember'){const m=mem();if(!m.includes(a.text)){m.push(a.text);setMem(m)}return 'запомнил: '+a.text}
+if(c.name==='forget'){const b=mem().length;setMem(mem().filter(x=>!x.includes(a.text)));return 'удалено '+(b-mem().length)+' фактов'}
+if(c.name==='read_file'){const t=chatFiles[a.name];if(t===undefined)return 'Нет такого файла. Есть: '+Object.keys(chatFiles).join(', ');const o=a.offset||0,l=a.limit||8000;return 'chars '+o+'..'+(o+l)+' of '+t.length+NL+t.slice(o,o+l)}
+if(c.name==='gh')return await ghApi(a);
+if(c.name==='delegate'){if(!agentMode)return 'Агентский режим выключен (кнопка в шапке)';return await delegate(a.task||'')}
+if(c.name==='send_file'){
+if(!a.name||a.content===undefined)return 'нужны name и content';
+const f={name:a.name,content:String(a.content)};
+const m=history[history.length-1];if(m&&m.role==='assistant')(m._files=m._files||[]).push(f);
+addOutFile(f);return 'Файл '+f.name+' прикреплён к ответу';
+}
 const t=mcpTools.find(x=>x.def.function.name===c.name);
 if(t){
 if(/send|delete|forward|trash|reply|edit/.test(t.name)&&!confirm('Разрешить действие '+t.name+'?'+NL+JSON.stringify(a).slice(0,600)))return 'Пользователь отклонил действие';
@@ -423,9 +532,16 @@ return 'Неизвестный инструмент';
 }catch(e){return 'Ошибка: '+e.message}
 }
 
+function sysPrompt(){
+let s=cfg.system||'';
+const m=mem();
+if(m.length)s+=(s?NL+NL:'')+'Факты обо мне/проекте (memory):'+NL+m.map(x=>'- '+x).join(NL);
+if(thinkMode)s+=(s?NL+NL:'')+'Режим рассуждений: перед финальным ответом кратко обозначь ход мыслей в тегах <think>...</think>. Внутри — черновик, снаружи — чистый ответ пользователю.';
+return s;
+}
 async function turn(signal){
-const msgs=[];if(cfg.system)msgs.push({role:'system',content:cfg.system});
-history.forEach(({_ui,...m})=>msgs.push(m));
+const msgs=[];const sp=sysPrompt();if(sp)msgs.push({role:'system',content:sp});
+history.forEach(({_ui,_files,...m})=>msgs.push(m));
 const body={model:cfg.model,messages:msgs,stream:true};
 const tl=cfg.tools?[...BUILTIN,...mcpTools.map(t=>t.def)]:[];if(tl.length)body.tools=tl;
 let res=null,err=null;
@@ -436,7 +552,10 @@ catch(e){err=e;await new Promise(r=>setTimeout(r,800))}
 if(!res)throw err;
 if(!res.ok)throw new Error('HTTP '+res.status+': '+(await res.text()).slice(0,300));
 const live=document.createElement('div');live.className='msg ai';live.innerHTML='<span class="dots"><span></span><span></span><span></span></span>';
-$('log').appendChild(live);scroll();
+const thinkEl=document.createElement('details');thinkEl.className='think live';thinkEl.style.display='none';
+const thSum=document.createElement('summary');thSum.innerHTML=IC.brain+'<span>думаю…</span>';thinkEl.appendChild(thSum);
+const thTxt=document.createElement('div');thTxt.className='txt';thinkEl.appendChild(thTxt);
+$('log').appendChild(thinkEl);$('log').appendChild(live);scroll();
 const rd=res.body.getReader(),dec=new TextDecoder();let buf='',content='',raf=0;const calls=[];
 try{
 while(true){
@@ -446,11 +565,15 @@ for(const l of lines){
 const s=l.trim();if(!s.startsWith('data:'))continue;const d=s.slice(5).trim();if(d==='[DONE]')continue;
 let j;try{j=JSON.parse(d)}catch{continue}
 const dl=j.choices&&j.choices[0]&&j.choices[0].delta;if(!dl)continue;
-if(dl.content){content+=dl.content;if(!raf)raf=requestAnimationFrame(()=>{raf=0;live.innerHTML=md(content);scroll()})}
+if(dl.content){content+=dl.content;if(!raf)raf=requestAnimationFrame(()=>{raf=0;
+const p=splitThink(content);
+if(p.think!==undefined&&p.think!==''&&content.startsWith('<think>')){thinkEl.style.display='';thTxt.textContent=p.think;live.innerHTML=md(p.text||'')}
+else live.innerHTML=md(content);
+scroll()})}
 for(const tc of dl.tool_calls||[]){const c=calls[tc.index||0]||(calls[tc.index||0]={id:'',name:'',args:''});if(tc.id)c.id=tc.id;if(tc.function){if(tc.function.name)c.name+=tc.function.name;if(tc.function.arguments)c.args+=tc.function.arguments}}
 }
 }
-}finally{live.remove()}
+}finally{thinkEl.classList.remove('live');live.remove()}
 return {content,calls:calls.filter(Boolean)};
 }
 function setBusy(b){
@@ -476,7 +599,7 @@ return false;
 async function agent(){
 setBusy(true);ctrl=new AbortController();
 const loop=async()=>{
-for(let step=0;step<12;step++){
+for(let step=0;step<14;step++){
 const r=await turn(ctrl.signal);
 if(!r.content&&!r.calls.length)throw new Error('Пустой ответ от сервера');
 const m={role:'assistant',content:r.content||null};
@@ -514,7 +637,7 @@ const inp=$('input');const text=inp.value.trim();
 if(!text&&!pending.length)return;
 if(!cfg.key){openSet();return}
 let body=text;const imgs=[];
-pending.forEach(p=>{if(p.kind==='img')imgs.push(p.url);else body+=NL+NL+'[Файл: '+p.name+']'+NL+'```'+NL+p.text.slice(0,60000)+NL+'```'});
+pending.forEach(p=>{if(p.kind==='img')imgs.push(p.url);else{chatFiles[p.name]=p.text;body+=NL+NL+'[Файл: '+p.name+'] (сохранён — читаю через read_file)'}});
 const content=imgs.length?[{type:'text',text:body||'Опиши изображение'},...imgs.map(u=>({type:'image_url',image_url:{url:u}}))]:body;
 history.push({role:'user',content,_ui:{text,files:pending.filter(p=>p.kind==='txt').map(p=>p.name)}});
 pending=[];renderChips();inp.value='';fit();renderAll();
@@ -522,12 +645,12 @@ await agent();
 }
 
 function openSet(){
-$('key').value=cfg.key;$('endpoint').value=cfg.endpoint;$('model').value=cfg.model;$('system').value=cfg.system;$('tools').checked=cfg.tools;$('mcp').value=cfg.mcp;
+$('key').value=cfg.key;$('endpoint').value=cfg.endpoint;$('model').value=cfg.model;$('system').value=cfg.system;$('tools').checked=cfg.tools;$('mcp').value=cfg.mcp;$('gh').value=cfg.gh||'';
 $('redir').textContent='Redirect URI для OAuth-клиента: '+REDIR;
 $('dlg').showModal();
 }
 function collect(){
-cfg={...cfg,key:$('key').value.trim(),endpoint:$('endpoint').value.trim()||'/api',model:$('model').value.trim()||DEF.model,system:$('system').value.trim(),tools:$('tools').checked,mcp:$('mcp').value.trim()};
+cfg={...cfg,key:$('key').value.trim(),endpoint:$('endpoint').value.trim()||'/api',model:$('model').value.trim()||DEF.model,system:$('system').value.trim(),tools:$('tools').checked,mcp:$('mcp').value.trim(),gh:$('gh').value.trim()};
 saveCfg();
 }
 $('set').onclick=openSet;
@@ -581,12 +704,15 @@ $('models').innerHTML=MODELS.map(m=>'<option value='+m+'>').join('');
 $('new').onclick=newChat;
 $('temp').onclick=()=>{
 if(tempChat){tempChat=false;cur='';try{localStorage.removeItem('chat2-cur')}catch{}}
-else{tempChat=true;history=[];cur='';try{localStorage.removeItem('chat2-cur')}catch{}}
-$('temp').style.borderColor=tempChat?'var(--accent)':'';
+else{tempChat=true;history=[];cur='';chatFiles={};try{localStorage.removeItem('chat2-cur')}catch{}}
+$('temp').classList.toggle('on',tempChat);
 $('tick').textContent=tempChat?'временный чат — не сохраняется':'';
 renderAll();renderChats();
 toast(tempChat?'Временный чат: история не сохраняется':'Временный чат выключен');
 };
+$('think').onclick=()=>{thinkMode=!thinkMode;$('think').classList.toggle('on',thinkMode);toast('Думающий режим '+(thinkMode?'включён':'выключен'))};
+$('agent').onclick=()=>{agentMode=!agentMode;$('agent').classList.toggle('on',agentMode);toast('Агентский режим '+(agentMode?'включён':'выключен'))};
+$('agent').classList.add('on');
 $('chats').onclick=()=>{renderChats();$('side').classList.add('open');$('scrim').classList.add('open')};
 $('scrim').onclick=closeSide;
 $('side-new').onclick=newChat;
