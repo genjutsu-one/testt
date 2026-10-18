@@ -1,0 +1,5 @@
+{
+  "functions": {
+    "api/tg.py": { "maxDuration": 60 }
+  }
+}
